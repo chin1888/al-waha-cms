@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News Detail - AL-WAHA</title>
+  <meta name="description" content="AL-WAHA news and media detail page.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .nd-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: calc(var(--nav-height) + 32px) 24px 80px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 48px;
+      align-items: start;
+    }
+    /* ---- Main Content ---- */
+    .nd-main {
+      min-width: 0;
+      overflow: hidden;
+    }
+    .nd-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 32px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nd-back:hover { color: var(--accent-pink); }
+    .nd-banner {
+      width: 100%;
+      max-height: 480px;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 32px;
+      background: var(--bg-secondary);
+    }
+    .nd-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .nd-banner-placeholder {
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+    }
+    .nd-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .nd-category {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(124,58,237,0.12);
+      color: #a855f7;
+    }
+    .nd-date {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+    .nd-title {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      line-height: 1.2;
+      color: var(--text-primary);
+      margin-bottom: 32px;
+    }
+    .nd-body {
+      font-size: 1.08rem;
+      color: #374151;
+      line-height: 1.95;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    .nd-body > *:first-child { margin-top: 0 !important; }
+    .nd-body > *:last-child { margin-bottom: 0 !important; }
+    .nd-body p {
+      display: block;
+      margin: 0 0 24px 0;
+      text-align: justify;
+      color: #4b5563;
+      line-height: 1.9;
+      font-size: 1.05rem;
+    }
+    .nd-body img {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      margin: 28px auto;
+      object-fit: contain;
+    }
+    .nd-body figure,
+    .nd-body picture {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      margin: 28px auto;
+    }
+    .nd-body figure img,
+    .nd-body picture img {
+      width: 100%;
+      margin: 0;
+    }
+    .nd-body h2 {
+      display: block;
+      font-size: 1.55rem;
+      color: #111827;
+      margin: 48px 0 20px 0;
+      padding-bottom: 14px;
+      font-weight: 800;
+      line-height: 1.3;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .nd-body h3 {
+      display: block;
+      font-size: 1.25rem;
+      color: #111827;
+      margin: 40px 0 16px 0;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+    .nd-body b,
+    .nd-body strong {
+      color: #111827;
+      font-weight: 700;
+    }
+    .nd-body ul,
+    .nd-body ol {
+      display: block;
+      margin: 0 0 24px 0;
+      padding-left: 28px;
+      color: #4b5563;
+      line-height: 1.9;
+    }
+    .nd-body ul { list-style-type: disc; }
+    .nd-body ol { list-style-type: decimal; }
+    .nd-body li {
+      display: list-item;
+      margin-bottom: 8px;
+      line-height: 1.8;
+      padding-left: 4px;
+      color: #4b5563;
+    }
+    .nd-body li:last-child { margin-bottom: 0; }
+    .nd-body blockquote {
+      display: block;
+      border-left: 4px solid #a855f7;
+      padding: 18px 24px;
+      margin: 32px 0;
+      background: rgba(124, 58, 237, 0.05);
+      border-radius: 0 10px 10px 0;
+      color: #6b7280;
+      font-style: italic;
+      line-height: 1.9;
+    }
+    .nd-body blockquote p {
+      margin-bottom: 12px;
+      color: #6b7280;
+    }
+    .nd-body blockquote p:last-child { margin-bottom: 0; }
+    .nd-body a {
+      color: #ec4899;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .nd-body a:hover { color: #a855f7; }
+    .nd-body hr {
+      display: block;
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      margin: 36px 0;
+    }
+    .nd-video {
+      margin: 32px 0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .nd-video video {
+      width: 100%;
+      display: block;
+    }
+    .nd-share {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .nd-share span {
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+    .nd-share a {
+      font-size: 0.8rem;
+      color: var(--accent-pink);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .nd-share a:hover { text-decoration: underline; }
+
+    /* ---- Sidebar — Related Articles ---- */
+    .nd-sidebar {
+      position: sticky;
+      top: calc(var(--nav-height) + 24px);
+    }
+    .nd-sidebar-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e5e7eb;
+      letter-spacing: -0.01em;
+    }
+    .nd-related-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .nd-related-item {
+      display: flex;
+      gap: 12px;
+      text-decoration: none;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #f3f4f6;
+      transition: all 0.2s;
+      background: #fafafa;
+    }
+    .nd-related-item:hover {
+      border-color: #e5e7eb;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transform: translateY(-1px);
+    }
+    .nd-related-thumb {
+      flex-shrink: 0;
+      width: 72px;
+      height: 56px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f3f4f6;
+    }
+    .nd-related-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .nd-related-thumb-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    .nd-related-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .nd-related-info h4 {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #1f2937;
+      line-height: 1.4;
+      margin: 0 0 4px 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .nd-related-info .nd-related-date {
+      font-size: 0.7rem;
+      color: #9ca3af;
+      margin: 0;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 900px) {
+      .nd-wrapper {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .nd-sidebar {
+        position: static;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 32px;
+      }
+    }
+  </style>
+</head>
+<body data-page="news">
+
+  <div id="age-modal-container"></div>
+  <div id="navbar-container"></div>
+
+  <div class="nd-wrapper" id="ndWrapper">
+    <!-- Left: Main Article -->
+    <div class="nd-main">
+      <div id="ndContent">
+        <div id="ndLoader" style="text-align:center;padding:80px 0;color:var(--text-tertiary);">Loading article...</div>
+      </div>
+    </div>
+    <!-- Right: Related Articles -->
+    <aside class="nd-sidebar" id="ndSidebar">
+      <div class="nd-sidebar-title">Related Articles</div>
+      <div class="nd-related-list" id="ndRelatedList">
+        <div style="font-size:0.85rem;color:#9ca3af;">Loading...</div>
+      </div>
+    </aside>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="js/content-store.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      await CMS.init();
+
+      var params = new URLSearchParams(window.location.search);
+      var id = parseInt(params.get('id'), 10);
+
+      if (!id) {
+        document.getElementById('ndContent').innerHTML = '<a href="news.html" class="nd-back">&larr; Back to News</a><div style="text-align:center;padding:120px 0;color:var(--text-tertiary);">Article not found.</div>';
+        document.getElementById('ndRelatedList').innerHTML = '';
+        return;
+      }
+
+      var article = await CMS.getNewsById(id);
+
+      if (!article) {
+        document.getElementById('ndContent').innerHTML = '<a href="news.html" class="nd-back">&larr; Back to News</a><div style="text-align:center;padding:120px 0;color:var(--text-tertiary);">Article not found.</div>';
+        document.getElementById('ndRelatedList').innerHTML = '';
+        return;
+      }
+
+      // Update page title
+      document.title = article.title + ' - AL-WAHA';
+      if (article.excerpt) {
+        var metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) metaDesc.setAttribute('content', article.excerpt);
+      }
+
+      // Banner
+      var bannerHTML = article.image
+        ? '<div class="nd-banner"><img src="' + article.image + '" alt="' + article.title + '"></div>'
+        : '<div class="nd-banner nd-banner-placeholder" style="background:' + (article.gradient || 'linear-gradient(135deg,#7c3aed,#ec4899)') + ';">' + (article.icon || '') + '</div>';
+
+      // Video
+      var videoHTML = article.video
+        ? '<div class="nd-video"><video src="' + article.video + '" controls style="width:100%;" poster="' + (article.image || '') + '"></video></div>'
+        : '';
+
+      // Content — smart format: full HTML pass-through, otherwise wrap in paragraphs
+      var rawContent = article.content || '';
+      var bodyHTML;
+      // Check for block-level HTML (p, h2, h3, ul, ol, blockquote, div)
+      var hasBlockTags = /<(\/)?\s*(p|h[1-6]|ul|ol|li|blockquote|div|section|table|figure)(\s|>)/i.test(rawContent);
+      if (hasBlockTags) {
+        bodyHTML = rawContent;
+      } else {
+        // No block-level tags — convert newlines to paragraphs
+        var text = rawContent || article.excerpt || '';
+        // Strip existing inline-only HTML markers if needed, but keep <b>/<i>/<br>
+        var lines = text.split('\n');
+        bodyHTML = lines.map(function(line) {
+          line = line.trim();
+          if (!line) return '';
+          return '<p>' + line + '</p>';
+        }).filter(Boolean).join('');
+      }
+
+      document.getElementById('ndContent').innerHTML =
+        '<a href="news.html" class="nd-back">&larr; Back to News</a>' +
+        bannerHTML +
+        '<div class="nd-meta">' +
+        '<span class="nd-category">' + (article.category || 'News') + '</span>' +
+        '<span class="nd-date">' + formatDate(article.date) + '</span>' +
+        '</div>' +
+        '<h1 class="nd-title">' + article.title + '</h1>' +
+        videoHTML +
+        '<div class="nd-body">' + bodyHTML + '</div>' +
+        '<div class="nd-share">' +
+        '<span>Share:</span>' +
+        '<a href="#" onclick="navigator.clipboard.writeText(window.location.href);showToast(\'Link copied!\');return false;">Copy Link</a>' +
+        '</div>';
+
+      // ---- Related Articles ----
+      var allNews = await CMS.getAllNews();
+      var related = allNews.filter(function(n) {
+        return n.id !== article.id;
+      });
+      // Prefer same category, then fill with recent
+      var sameCat = related.filter(function(n) { return n.category === article.category; });
+      var other = related.filter(function(n) { return n.category !== article.category; });
+      var relatedList = sameCat.concat(other).slice(0, 4);
+
+      var relatedHTML = relatedList.map(function(n) {
+        var thumb;
+        if (n.image) {
+          thumb = '<div class="nd-related-thumb"><img src="' + n.image + '" alt="' + n.title + '" loading="lazy"></div>';
+        } else {
+          thumb = '<div class="nd-related-thumb"><div class="nd-related-thumb-placeholder" style="background:' + (n.gradient || '#f3f4f6') + ';">' + (n.icon || '') + '</div></div>';
+        }
+        return '<a href="news-detail.html?id=' + n.id + '" class="nd-related-item">' +
+          thumb +
+          '<div class="nd-related-info">' +
+          '<h4>' + n.title + '</h4>' +
+          '<p class="nd-related-date">' + formatDate(n.date) + '</p>' +
+          '</div></a>';
+      }).join('');
+
+      if (relatedHTML) {
+        document.getElementById('ndRelatedList').innerHTML = relatedHTML;
+      } else {
+        document.getElementById('ndRelatedList').innerHTML = '<div style="font-size:0.85rem;color:#9ca3af;">No related articles</div>';
+      }
+    });
+  </script>
+</body>
+</html>

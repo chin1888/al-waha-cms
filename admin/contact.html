@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages - AL-WAHA CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/admin.css">
+  <style>
+    .msg-row { cursor: pointer; transition: background 0.15s; }
+    .msg-row:hover { background: rgba(124,58,237,0.03); }
+    .msg-row.unread { background: rgba(124,58,237,0.05); font-weight: 600; }
+    .msg-row.unread td:first-child::before { content: '● '; color: #7c3aed; }
+    .msg-detail-card {
+      background: var(--admin-card-bg);
+      border: 1px solid var(--admin-border);
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .msg-detail-card h3 { margin: 0 0 8px 0; font-size: 1.15rem; color: var(--admin-text); }
+    .msg-detail-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+      color: var(--admin-text-tertiary);
+    }
+    .msg-detail-body {
+      padding: 16px;
+      background: #fafafa;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      line-height: 1.7;
+      color: #374151;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-icon-btn" id="menuToggle" style="display:none;" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <h1>用户留言</h1>
+        </div>
+        <div class="topbar-right">
+          <span id="msgCount" style="font-size:0.85rem;color:var(--admin-text-tertiary)"></span>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th>姓名 / 邮箱</th>
+                <th>电话</th>
+                <th>国家</th>
+                <th>留言时间</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="msgTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="admin-modal hidden" id="msgDetailModal">
+        <div class="admin-modal-content" style="max-width:600px;">
+          <div class="admin-modal-header">
+            <h3>留言详情</h3>
+            <button class="admin-modal-close" onclick="closeMsgModal()">✕</button>
+          </div>
+          <div id="msgDetail"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/content-store.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    renderSidebar('contact-msgs');
+
+    async function loadMessages() {
+      var msgs = await CMS.getContactSubmissions();
+      document.getElementById('msgCount').textContent = msgs.length + ' messages';
+      var tbody = document.getElementById('msgTableBody');
+
+      tbody.innerHTML = msgs.map(function(m) {
+        return '<tr class="msg-row' + (m.is_read ? '' : ' unread') + '" onclick="openMsgModal(' + m.id + ')">' +
+          '<td><div style="font-weight:600;">' + escapeHtml(m.name) + '</div><div style="font-size:0.75rem;color:var(--admin-text-tertiary);">' + escapeHtml(m.email) + '</div></td>' +
+          '<td>' + (m.phone || '—') + '</td>' +
+          '<td>' + (m.country || '—') + '</td>' +
+          '<td>' + new Date(m.created_at).toLocaleString('zh-CN', {month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) + '</td>' +
+          '<td>' + (m.is_read ? '已读' : '<span style="color:#a855f7;">未读</span>') + '</td>' +
+          '<td><button class="admin-btn admin-btn-sm" style="color:#ef4444;border-color:#ef4444;" onclick="event.stopPropagation();deleteMsg(' + m.id + ')">🗑 删除</button></td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    async function deleteMsg(id) {
+      if (!confirm('确认删除这条留言？')) return;
+      var ok = await CMS.deleteContactSubmission(id);
+      if (ok) {
+        if (document.getElementById('msgDetailModal').classList.contains('hidden') === false) {
+          closeMsgModal();
+        }
+        loadMessages();
+      }
+    }
+
+    var currentMsgId = null;
+
+    async function openMsgModal(id) {
+      var msgs = await CMS.getContactSubmissions();
+      var m = msgs.find(function(x) { return x.id === id; });
+      if (!m) return;
+      currentMsgId = id;
+      document.getElementById('msgDetail').innerHTML =
+        '<div class="msg-detail-card">' +
+        '<h3>' + escapeHtml(m.name) + '</h3>' +
+        '<div class="msg-detail-meta">' +
+        '<span>📧 ' + escapeHtml(m.email) + '</span>' +
+        (m.phone ? '<span>📞 ' + escapeHtml(m.phone) + '</span>' : '') +
+        (m.country ? '<span>🌍 ' + escapeHtml(m.country) + '</span>' : '') +
+        '<span>🕐 ' + new Date(m.created_at).toLocaleString('zh-CN') + '</span>' +
+        '</div>' +
+        '<div class="msg-detail-body">' + escapeHtml(m.message) + '</div>' +
+        '<div style="margin-top:16px;display:flex;gap:8px;">' +
+        '<button class="admin-btn admin-btn-sm" style="color:#ef4444;border-color:#ef4444;" onclick="deleteMsg(' + m.id + ')">🗑 删除留言</button>' +
+        '</div>' +
+        '</div>';
+      document.getElementById('msgDetailModal').classList.remove('hidden');
+      if (!m.is_read) {
+        await CMS.markContactRead(id);
+        await loadMessages();
+      }
+    }
+
+    function closeMsgModal() {
+      document.getElementById('msgDetailModal').classList.add('hidden');
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    window._onLangChange = function(lang) {
+      renderSidebar('contact-msgs');
+      loadMessages();
+      I18N.applyToDOM();
+    };
+
+    loadMessages();
+  </script>
+</body>
+</html>

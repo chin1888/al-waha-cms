@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" width="100%" height="100%">
+  <defs>
+    <!-- Glow filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+    <filter id="glowStrong" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <!-- Continent gradient -->
+    <radialGradient id="ctGrad" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.55" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background - low-density dot grid -->
+  <g opacity="0.08">
+    <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="20" cy="20" r="0.6" fill="#9ca3af" />
+    </pattern>
+    <rect width="1000" height="500" fill="url(#dots)" />
+  </g>
+
+  <!-- Ocean subtle -->
+  <rect width="1000" height="500" fill="#0a0a14" rx="12" />
+
+  <!-- ===== CONTINENTS with real SVG paths (viewBox 1000x500, Robinson-like projection) ===== -->
+
+  <!-- North America -->
+  <path d="M85,95 L110,80 L150,78 L175,55 L210,50 L240,42 L260,48 L290,38 L320,42 L335,55 L320,70 L310,82 L300,95 L290,110 L275,120 L280,135 L270,150 L255,158 L240,165 L220,170 L200,168 L185,175 L165,178 L150,185 L140,195 L125,200 L110,195 L95,185 L80,175 L65,160 L55,145 L62,125 L70,108 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1.2" filter="url(#glow)" opacity="0.75" />
+
+  <!-- South America -->
+  <path d="M240,240 L250,225 L265,220 L275,225 L285,240 L288,260 L282,285 L270,310 L260,335 L248,350 L238,355 L225,348 L215,335 L210,320 L205,300 L208,280 L215,260 L225,245 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1.2" filter="url(#glow)" opacity="0.75" />
+
+  <!-- Africa -->
+  <path d="M430,145 L450,140 L465,142 L480,148 L490,160 L495,178 L490,200 L485,220 L475,245 L468,270 L455,290 L440,305 L430,312 L420,305 L415,290 L410,270 L408,250 L412,230 L415,210 L418,190 L420,170 L425,155 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1.2" filter="url(#glow)" opacity="0.75" />
+
+  <!-- Europe -->
+  <path d="M425,52 L440,45 L460,38 L480,35 L500,38 L515,45 L525,55 L528,68 L525,80 L518,90 L508,95 L495,100 L480,102 L465,100 L450,95 L438,90 L430,82 L425,70 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1.2" filter="url(#glow)" opacity="0.72" />
+
+  <!-- Asia (mainland) -->
+  <path d="M528,55 L550,38 L580,28 L610,25 L640,28 L670,35 L700,45 L730,58 L755,72 L775,88 L790,105 L795,125 L790,145 L778,160 L765,175 L748,185 L730,190 L710,195 L690,192 L670,185 L655,175 L640,168 L620,162 L600,158 L580,155 L560,152 L540,148 L530,142 L528,130 L525,115 L525,100 L526,80 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1.2" filter="url(#glow)" opacity="0.72" />
+
+  <!-- Southeast Asian Peninsula -->
+  <path d="M690,192 L700,200 L710,215 L712,232 L708,248 L698,258 L685,262 L672,258 L665,245 L662,230 L665,215 L675,200 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.7" />
+
+  <!-- Indonesia / Malay Archipelago -->
+  <path d="M708,250 L720,252 L735,248 L745,252 L758,250 L766,255 L772,262 L765,268 L750,270 L735,268 L720,265 L710,258 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.68" />
+  <path d="M758,270 L772,268 L785,272 L798,278 L805,285 L798,290 L782,288 L768,282 L758,275 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.65" />
+  <path d="M802,285 L815,282 L828,286 L835,292 L828,298 L812,296 L802,290 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.62" />
+
+  <!-- Philippines -->
+  <path d="M788,105 L795,108 L798,118 L795,128 L790,135 L785,132 L782,122 L783,112 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.65" />
+  <path d="M800,128 L805,132 L808,142 L805,150 L798,148 L796,138 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.62" />
+
+  <!-- Taiwan (part of China) -->
+  <path d="M742,168 L746,166 L750,168 L749,175 L744,178 L740,175 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="0.8" filter="url(#glow)" opacity="0.7" />
+
+  <!-- Hainan (part of China) -->
+  <path d="M722,192 L726,190 L728,195 L726,200 L722,198 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="0.7" filter="url(#glow)" opacity="0.7" />
+
+  <!-- Australia -->
+  <path d="M680,320 L710,308 L738,308 L760,315 L778,330 L785,350 L780,370 L765,388 L745,398 L720,402 L695,395 L675,380 L665,360 L668,340 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1.2" filter="url(#glow)" opacity="0.7" />
+
+  <!-- New Zealand -->
+  <path d="M808,385 L815,382 L822,388 L820,398 L815,405 L808,402 L805,395 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.68" />
+  <path d="M818,410 L825,408 L830,414 L828,422 L822,425 L817,422 L815,416 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.65" />
+
+  <!-- UK (British Isles) -->
+  <path d="M415,38 L425,32 L435,36 L432,46 L425,50 L416,48 L412,42 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.72" />
+  <path d="M398,42 L405,40 L410,45 L406,50 L400,48 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.68" />
+
+  <!-- Japan (main islands) -->
+  <path d="M755,65 L760,62 L766,64 L770,72 L768,82 L763,90 L758,95 L753,92 L750,85 L749,75 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.7" />
+  <path d="M772,58 L775,56 L778,58 L779,64 L777,70 L774,72 L771,68 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="0.8" filter="url(#glow)" opacity="0.65" />
+
+  <!-- Sri Lanka -->
+  <path d="M605,175 L610,172 L614,178 L612,184 L607,182 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="0.7" filter="url(#glow)" opacity="0.65" />
+
+  <!-- Madagascar -->
+  <path d="M490,275 L496,272 L500,280 L498,290 L492,295 L487,290 L486,282 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="1" filter="url(#glow)" opacity="0.65" />
+
+  <!-- Greenland -->
+  <path d="M245,18 L260,12 L275,15 L282,22 L278,32 L268,38 L255,38 L245,32 L240,25 Z"
+    fill="url(#ctGrad)" stroke="#a855f7" stroke-width="0.9" filter="url(#glow)" opacity="0.62" />
+
+  <!-- ===== Business Location Markers ===== -->
+
+  <!-- Glow circle marker -->
+  <g>
+    <!-- North America: New York -->
+    <circle cx="208" cy="155" r="4" fill="#10b981" filter="url(#glowStrong)" opacity="0.9" />
+    <circle cx="208" cy="155" r="1.5" fill="#fff" opacity="0.9" />
+    <!-- South America: Sao Paulo -->
+    <circle cx="265" cy="320" r="3.5" fill="#10b981" filter="url(#glowStrong)" opacity="0.85" />
+    <circle cx="265" cy="320" r="1.3" fill="#fff" opacity="0.9" />
+    <!-- Europe: London -->
+    <circle cx="422" cy="42" r="4" fill="#10b981" filter="url(#glowStrong)" opacity="0.9" />
+    <circle cx="422" cy="42" r="1.5" fill="#fff" opacity="0.9" />
+    <!-- Europe: Berlin -->
+    <circle cx="468" cy="80" r="3" fill="#10b981" filter="url(#glowStrong)" opacity="0.8" />
+    <circle cx="468" cy="80" r="1.2" fill="#fff" opacity="0.9" />
+    <!-- Africa: Lagos -->
+    <circle cx="442" cy="230" r="3.5" fill="#10b981" filter="url(#glowStrong)" opacity="0.85" />
+    <circle cx="442" cy="230" r="1.3" fill="#fff" opacity="0.9" />
+    <!-- Middle East: Dubai -->
+    <circle cx="548" cy="162" r="3.5" fill="#10b981" filter="url(#glowStrong)" opacity="0.85" />
+    <circle cx="548" cy="162" r="1.3" fill="#fff" opacity="0.9" />
+    <!-- Asia: Shanghai (part of China) -->
+    <circle cx="710" cy="145" r="4" fill="#10b981" filter="url(#glowStrong)" opacity="0.9" />
+    <circle cx="710" cy="145" r="1.5" fill="#fff" opacity="0.9" />
+    <!-- Asia: Tokyo -->
+    <circle cx="760" cy="85" r="3.5" fill="#10b981" filter="url(#glowStrong)" opacity="0.85" />
+    <circle cx="760" cy="85" r="1.3" fill="#fff" opacity="0.9" />
+    <!-- Asia: Seoul -->
+    <circle cx="730" cy="105" r="3" fill="#10b981" filter="url(#glowStrong)" opacity="0.8" />
+    <circle cx="730" cy="105" r="1.2" fill="#fff" opacity="0.9" />
+    <!-- Southeast Asia: Singapore -->
+    <circle cx="700" cy="235" r="3" fill="#10b981" filter="url(#glowStrong)" opacity="0.8" />
+    <circle cx="700" cy="235" r="1.2" fill="#fff" opacity="0.9" />
+    <!-- Southeast Asia: Bangkok -->
+    <circle cx="675" cy="210" r="3" fill="#10b981" filter="url(#glowStrong)" opacity="0.8" />
+    <circle cx="675" cy="210" r="1.2" fill="#fff" opacity="0.9" />
+    <!-- Oceania: Sydney -->
+    <circle cx="756" cy="380" r="3.5" fill="#10b981" filter="url(#glowStrong)" opacity="0.85" />
+    <circle cx="756" cy="380" r="1.3" fill="#fff" opacity="0.9" />
+    <!-- Oceania: Auckland -->
+    <circle cx="825" cy="408" r="2.5" fill="#10b981" filter="url(#glowStrong)" opacity="0.75" />
+    <circle cx="825" cy="408" r="1" fill="#fff" opacity="0.9" />
+    <!-- Africa: Johannesburg -->
+    <circle cx="465" cy="340" r="3" fill="#10b981" filter="url(#glowStrong)" opacity="0.8" />
+    <circle cx="465" cy="340" r="1.2" fill="#fff" opacity="0.9" />
+    <!-- North America: Los Angeles -->
+    <circle cx="155" cy="160" r="3" fill="#10b981" filter="url(#glowStrong)" opacity="0.8" />
+    <circle cx="155" cy="160" r="1.2" fill="#fff" opacity="0.9" />
+    <!-- North America: Toronto -->
+    <circle cx="218" cy="128" r="3" fill="#10b981" filter="url(#glowStrong)" opacity="0.8" />
+    <circle cx="218" cy="128" r="1.2" fill="#fff" opacity="0.9" />
+    <!-- South America: Buenos Aires -->
+    <circle cx="250" cy="365" r="3" fill="#10b981" filter="url(#glowStrong)" opacity="0.8" />
+    <circle cx="250" cy="365" r="1.2" fill="#fff" opacity="0.9" />
+  </g>
+</svg>

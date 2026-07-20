@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKE JOY HAPPEN - AL-WAHA</title>
+  <meta name="description" content="Learn about AL-WAHA's mission to accelerate the world's transition to a smoking-free place.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="about">
+
+  <div id="age-modal-container"></div>
+  <div id="navbar-container"></div>
+
+  <!-- ===== 1. MAKE JOY HAPPEN Hero (Split-screen) ===== -->
+  <section class="about-hero-v2">
+    <div class="about-hero-inner">
+      <div class="about-hero-left reveal">
+        <div class="hero-badge"><span class="dot"></span> About Us</div>
+        <h1 data-cms="about._heroTitle" data-cms-auto-gradient>MAKE JOY<br>HAPPEN</h1>
+        <p data-cms="about._heroSubtitle">Since our launch in 2019, we've become a world-renowned brand with a complete design, research and development, manufacturing and global distribution system.</p>
+      </div>
+      <div class="about-hero-right reveal">
+        <div class="about-hero-visual" id="heroVisual">
+          <img id="heroVisualImg" src="" alt="" style="display:none;">
+          <span class="about-hero-watermark" data-cms="about._heroOverlayText"></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 2. Mission / Vision / Values — Glassmorphism + Full BG ===== -->
+  <section class="about-glass-section" id="aboutGlassSection">
+    <div class="about-glass-bg"></div>
+    <div class="about-glass-overlay"></div>
+
+    <!-- Left floating card -->
+    <div class="about-glass-card reveal" id="glassCard">
+      <div class="glass-card-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10"/><path d="M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10"/></svg>
+      </div>
+      <h2 class="glass-card-title" id="glassTitle"></h2>
+      <div class="glass-card-body" id="glassBody"></div>
+    </div>
+
+    <!-- Bottom-right tab buttons -->
+    <div class="about-glass-tabs" id="glassTabs">
+      <button class="glass-tab active" data-tab="mission" id="tabMission">MISSION</button>
+      <button class="glass-tab" data-tab="vision" id="tabVision">VISION</button>
+      <button class="glass-tab" data-tab="values" id="tabValues">VALUES</button>
+    </div>
+  </section>
+
+  <!-- ===== 5. MILESTONES — Dark Vertical Timeline ===== -->
+  <section class="about-timeline-dark" id="timelineDark">
+    <div class="about-timeline-dark-inner">
+      <!-- Left: Image display -->
+      <div class="atd-left">
+        <div class="atd-img-stack" id="atdImgStack"></div>
+      </div>
+      <!-- Center: Timeline track -->
+      <div class="atd-center">
+        <div class="atd-track">
+          <div class="atd-line"></div>
+          <div class="atd-dots" id="atdDots"></div>
+        </div>
+      </div>
+      <!-- Right: Detail text -->
+      <div class="atd-right" id="atdDetail">
+        <div class="atd-page-num" id="atdPageNum">01/07</div>
+        <h3 class="atd-title" id="atdTitle"></h3>
+        <p class="atd-desc" id="atdDesc"></p>
+        <div class="atd-nav">
+          <button class="atd-nav-btn" id="atdPrev" title="Previous">&#9650;</button>
+          <button class="atd-nav-btn" id="atdNext" title="Next">&#9660;</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Global Presence — Dotted Map ===== -->
+  <section class="about-global">
+    <div class="ag-title-area reveal">
+      <h2 class="ag-main-title">Spanning The Whole Globe</h2>
+      <p class="ag-subtitle">Over 6 years of group operations;</p>
+      <p class="ag-subtitle">reputation and business cover 70 countries.</p>
+    </div>
+    <div class="ag-map-wrap reveal">
+      <div class="ag-dot-map" id="agDotMap"></div>
+      <div class="ag-markers" id="agMarkers"></div>
+    </div>
+    <div class="ag-stats reveal" id="agStats"></div>
+  </section>
+
+  <!-- ===== 6. Meet AL-WAHA — Dark Fullscreen ===== -->
+  <section class="about-meet-dark">
+    <div class="am-content reveal">
+      <h2 class="am-title">Meet AL-WAHA</h2>
+      <p class="am-body" data-cms="about._meetDesc">AL-WAHA is dedicated to providing premium vaping products for users who seek a high-quality lifestyle.</p>
+    </div>
+    <div class="am-images reveal" id="amImages"></div>
+  </section>
+
+  <!-- ===== 7. GROWTH / AHEAD ===== -->
+  <section class="about-growth-v2">
+    <div class="container-narrow reveal">
+      <div class="about-growth-row">
+        <div class="about-growth-block">
+          <div class="about-section-label" style="font-size: 3rem; font-weight: 900; color: var(--text-primary); line-height: 1.1;">GROWTH</div>
+        </div>
+        <div class="about-growth-block">
+          <div class="about-section-label" style="font-size: 3rem; font-weight: 900; color: var(--text-primary); line-height: 1.1;">AHEAD</div>
+        </div>
+      </div>
+      <p class="about-growth-desc" data-cms-html="about._growthDesc">AL-WAHA is at the forefront of advancing from design, technology to flavors.<br>We will always prioritize user needs and customer service<br>and continue to innovate and break through.<br>Now let's explore more possibilities on this journey with AL-WAHA.</p>
+    </div>
+  </section>
+
+  <div id="footer-container"></div>
+
+  <script src="js/content-store.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      await CMS.init();
+      CMS.applyToPage();
+
+      // ---- Hero Visual Image ----
+      var heroImg = CMS.get('about._heroImage');
+      var heroImgEl = document.getElementById('heroVisualImg');
+      if (heroImg && heroImgEl) {
+        heroImgEl.src = heroImg;
+        heroImgEl.style.display = 'block';
+        heroImgEl.alt = 'AL-WAHA Brand';
+      }
+
+      // ---- Glass Card Tab Switching ----
+      var valueLabels = ['Customer First', 'Persistence', 'Take Ownership', 'Open and Enterprising', 'Integrity'];
+
+      // Tab background images from CMS
+      var tabBgs = {
+        mission: CMS.get('about._missionBg') || '',
+        vision:  CMS.get('about._visionBg')  || '',
+        values:  CMS.get('about._valuesBg')  || ''
+      };
+      var defaultBg = 'url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80)';
+      var glassBg = document.querySelector('.about-glass-bg');
+
+      var tabData = {
+        mission: {
+          title: 'OUR MISSION',
+          body: '<p>' + (CMS.get('about._missionDesc') || 'Atomization technology drives 1.1 billion smokers worldwide to reduce harmful consumption and leads the way to a better life.') + '</p>',
+          icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>'
+        },
+        vision: {
+          title: 'OUR VISION',
+          body: '<p>' + (CMS.get('about._visionDesc') || 'AL-WAHA is an international vape brand devoted to accelerating the world\'s transition to a smoking-free place.') + '</p>',
+          icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+        },
+        values: {
+          title: 'OUR VALUES',
+          body: '<ul class="glass-values-list">' + valueLabels.map(function(v) {
+            return '<li>' + v + '</li>';
+          }).join('') + '</ul>',
+          icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+        }
+      };
+
+      function switchTab(tab) {
+        document.querySelectorAll('.glass-tab').forEach(function(b) { b.classList.remove('active'); });
+        var activeBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+        if (activeBtn) activeBtn.classList.add('active');
+        var data = tabData[tab];
+        var titleEl = document.getElementById('glassTitle');
+        var bodyEl = document.getElementById('glassBody');
+        if (titleEl) titleEl.textContent = data.title;
+        if (bodyEl) bodyEl.innerHTML = data.body;
+        if (data.icon) {
+          var iconEl = document.querySelector('.glass-card-icon');
+          if (iconEl) iconEl.innerHTML = data.icon;
+        }
+
+        // Switch background image
+        if (glassBg) {
+          var bgUrl = tabBgs[tab];
+          var newBg = bgUrl ? 'url(' + bgUrl + ')' : defaultBg;
+          glassBg.style.backgroundImage = 'linear-gradient(160deg, rgba(245,245,247,0.12) 0%, rgba(235,236,240,0.10) 50%, rgba(245,245,247,0.12) 100%), ' + newBg;
+        }
+      }
+
+      document.querySelectorAll('.glass-tab').forEach(function(btn) {
+        btn.addEventListener('mouseenter', function() {
+          switchTab(this.dataset.tab);
+        });
+      });
+
+      // Init with VALUES active
+      switchTab('values');
+
+      // ---- Dark Timeline ----
+      var timeline = await CMS.getTimeline();
+      var currentIdx = 0;
+      var totalItems = timeline && timeline.length > 0 ? timeline.length : 0;
+
+      function renderTimeline() {
+        // Dots
+        var dotsHTML = '';
+        for (var i = 0; i < totalItems; i++) {
+          dotsHTML += '<div class="atd-dot' + (i === currentIdx ? ' active' : '') + '" data-idx="' + i + '"><span class="atd-year-label">' + timeline[i].year + '</span></div>';
+        }
+        var dotsEl = document.getElementById('atdDots');
+        if (dotsEl) dotsEl.innerHTML = dotsHTML;
+
+        // Images
+        var imgEl = document.getElementById('atdImgStack');
+        if (imgEl) {
+          var imgHTML = '';
+          for (var j = 0; j < totalItems; j++) {
+            var cls = j === currentIdx ? ' active' : (j < currentIdx ? ' above' : ' below');
+            imgHTML += '<div class="atd-img' + cls + '">' +
+              (timeline[j].image ? '<img src="' + timeline[j].image + '" alt="' + timeline[j].title + '">' :
+               '<div class="atd-img-placeholder">' + (timeline[j].year || '') + '</div>') +
+              '</div>';
+          }
+          imgEl.innerHTML = imgHTML;
+        }
+
+        // Detail
+        var item = timeline[currentIdx];
+        var pageNum = document.getElementById('atdPageNum');
+        var titleEl = document.getElementById('atdTitle');
+        var descEl = document.getElementById('atdDesc');
+        if (pageNum) pageNum.textContent = String(currentIdx + 1).padStart(2, '0') + '/' + String(totalItems).padStart(2, '0');
+        if (titleEl) titleEl.textContent = item.title;
+        if (descEl) descEl.textContent = item.desc || '';
+
+        // Dot click
+        document.querySelectorAll('.atd-dot').forEach(function(d) {
+          d.onclick = function() { currentIdx = parseInt(this.dataset.idx); renderTimeline(); };
+        });
+      }
+
+      document.getElementById('atdPrev').onclick = function() {
+        if (currentIdx > 0) { currentIdx--; renderTimeline(); }
+      };
+      document.getElementById('atdNext').onclick = function() {
+        if (currentIdx < totalItems - 1) { currentIdx++; renderTimeline(); }
+      };
+
+      if (totalItems > 0) renderTimeline();
+
+      // ---- Global Presence ----
+      // Dot map SVG
+      var dotMap = document.getElementById('agDotMap');
+      if (dotMap) {
+        dotMap.innerHTML = '<img src="assets/world-map.svg" alt="World Map" style="width:100%;height:100%;display:block;">';
+      }
+      // Markers
+      var markersEl = document.getElementById('agMarkers');
+      if (markersEl) {
+        var positions = [
+          {x:14,y:18,big:1},{x:22,y:14,big:0},{x:18,y:22,big:0}, // N.America
+          {x:17,y:40,big:0},{x:20,y:55,big:1}, // S.America
+          {x:42,y:16,big:0},{x:46,y:18,big:0},{x:44,y:24,big:0}, // Europe
+          {x:44,y:40,big:0},{x:46,y:52,big:1},{x:42,y:60,big:0}, // Africa
+          {x:55,y:18,big:0},{x:62,y:20,big:1},{x:58,y:28,big:0},{x:68,y:22,big:0}, // Asia
+          {x:65,y:36,big:0},{x:78,y:48,big:0},{x:85,y:72,big:0} // SE/Oceania
+        ];
+        markersEl.innerHTML = positions.map(function(p) {
+          return '<div class="ag-marker' + (p.big ? ' ag-marker-big' : '') + '" style="left:' + p.x + '%;top:' + p.y + '%;">' +
+            '<svg width="' + (p.big ? '22' : '14') + '" height="' + (p.big ? '29' : '19') + '" viewBox="0 0 14 19"><path d="M7 0a7 7 0 0 0-7 7c0 5.2 7 12 7 12s7-6.8 7-12a7 7 0 0 0-7-7zm0 10a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" fill="' + (p.big ? '#10b981' : '#34d399') + '"/></svg>' +
+            '</div>';
+        }).join('');
+      }
+      // Stats
+      var agStats = document.getElementById('agStats');
+      if (agStats) {
+        var statsData = [
+          { num: '7', label: 'Years' },
+          { num: '70', label: 'Countries' },
+          { num: '2500', suf: '+', label: 'Employee' },
+          { num: '150', suf: 'm', label: 'Pcs/Month Capacity' }
+        ];
+        var sDefault = ['6','30','500','5'];
+        agStats.innerHTML = statsData.map(function(s,i) {
+          var n = CMS.get('about._stats'+(i+1)+'Num');
+          var sf = CMS.get('about._stats'+(i+1)+'Suf');
+          var lb = CMS.get('about._stats'+(i+1)+'Label');
+          var numVal = n || s.num;
+          return '<div class="ag-stat-card">' +
+            '<div class="ag-stat-icon"></div>' +
+            '<div class="ag-stat-num"><span class="ag-count-up" data-target="' + numVal + '">0</span><span class="ag-stat-suf">' + (sf || s.suf || '') + '</span></div>' +
+            '<div class="ag-stat-rule"></div>' +
+            '<div class="ag-stat-label">' + (lb || s.label) + '</div>' +
+            '</div>';
+        }).join('');
+
+        // Count-up animation on scroll (retriggers every time)
+        var agCounters = agStats.querySelectorAll('.ag-count-up');
+        var agObserver = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              agCounters.forEach(function(el) {
+                el.textContent = '0';
+                var target = parseInt(el.dataset.target, 10) || 0;
+                var duration = 1500;
+                var start = performance.now();
+                function step(ts) {
+                  var elapsed = ts - start;
+                  var progress = Math.min(elapsed / duration, 1);
+                  var current = Math.round(progress * target);
+                  el.textContent = current;
+                  if (progress < 1) requestAnimationFrame(step);
+                }
+                requestAnimationFrame(step);
+              });
+            }
+          });
+        }, { threshold: 0.3 });
+        agObserver.observe(agStats);
+      }
+
+      // ---- Meet Images ----
+      var amImages = document.getElementById('amImages');
+      if (amImages) {
+        var labels = ['', '', '', ''];
+        var imgs = [];
+        for (var mi = 1; mi <= 4; mi++) {
+          imgs.push(CMS.get('about._meetImg' + mi) || '');
+        }
+        amImages.innerHTML = imgs.map(function(img, i) {
+          var inner = img
+            ? '<img src="' + img + '" alt="' + labels[i] + '" loading="lazy">'
+            : '<div class="am-card-placeholder"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>';
+          return '<div class="am-card"><div class="am-card-img">' + inner + '</div><span class="am-card-label">' + labels[i] + '</span></div>';
+        }).join('');
+      }
+
+      // ---- Growth Background ----
+      var growthBg = CMS.get('about._growthBg');
+      if (growthBg) {
+        var growthSection = document.querySelector('.about-growth-v2');
+        if (growthSection) {
+          growthSection.style.backgroundImage = 'url(' + growthBg + ')';
+          growthSection.style.backgroundSize = '1920px 1080px';
+          growthSection.style.backgroundPosition = 'center';
+          growthSection.style.backgroundRepeat = 'no-repeat';
+        }
+      }
+
+      setTimeout(initScrollReveal, 100);
+    });
+  </script>
+</body>
+</html>

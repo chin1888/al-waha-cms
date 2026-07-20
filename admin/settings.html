@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - AL-WAHA Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-icon-btn" id="menuToggle">☰</button>
+          <h1>Settings</h1>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-icon-btn">🔔<span class="notification-dot"></span></button>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="page-title">
+          <div>
+            <h2>System Settings</h2>
+            <p>Configure your website and admin preferences.</p>
+          </div>
+        </div>
+
+        <!-- Settings sections -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+
+          <!-- General Settings -->
+          <div class="form-card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              🏢 General Settings
+            </h3>
+            <form onsubmit="event.preventDefault(); showAdminToast('General settings saved!');">
+              <div class="admin-form-group">
+                <label>Site Name</label>
+                <input type="text" value="AL-WAHA">
+              </div>
+              <div class="admin-form-group">
+                <label>Tagline</label>
+                <input type="text" value="Make Joy Happen">
+              </div>
+              <div class="admin-form-group">
+                <label>Support Email</label>
+                <input type="email" value="support@al-waha.com">
+              </div>
+              <div class="admin-form-group">
+                <label>Business Email</label>
+                <input type="email" value="business@al-waha.com">
+              </div>
+              <div class="admin-form-group">
+                <label>Phone</label>
+                <input type="tel" value="+86 755 8888 8888">
+              </div>
+              <button type="submit" class="admin-btn admin-btn-primary">Save Changes</button>
+            </form>
+          </div>
+
+          <!-- Age Verification -->
+          <div class="form-card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              🔞 Age Verification
+            </h3>
+            <form onsubmit="event.preventDefault(); showAdminToast('Age verification settings saved!');">
+              <div class="admin-form-group">
+                <label>Minimum Age</label>
+                <select>
+                  <option>18</option>
+                  <option selected>21</option>
+                  <option>25</option>
+                </select>
+              </div>
+              <div class="admin-form-group">
+                <label>Verification Message</label>
+                <textarea>This website contains products with nicotine. By entering, you confirm that you are of legal age in your jurisdiction.</textarea>
+              </div>
+              <div class="admin-form-group">
+                <label>Age Verification Enabled</label>
+                <select>
+                  <option selected>Enabled</option>
+                  <option>Disabled</option>
+                </select>
+              </div>
+              <button type="submit" class="admin-btn admin-btn-primary">Save Changes</button>
+            </form>
+          </div>
+
+          <!-- Notification Settings -->
+          <div class="form-card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              🔔 Notifications
+            </h3>
+            <form onsubmit="event.preventDefault(); showAdminToast('Notification settings saved!');">
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                  <input type="checkbox" checked style="width: 18px; height: 18px; accent-color: var(--admin-accent);">
+                  <span style="font-size: 0.9rem;">New order notifications</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                  <input type="checkbox" checked style="width: 18px; height: 18px; accent-color: var(--admin-accent);">
+                  <span style="font-size: 0.9rem;">Low stock alerts</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                  <input type="checkbox" checked style="width: 18px; height: 18px; accent-color: var(--admin-accent);">
+                  <span style="font-size: 0.9rem;">New customer registrations</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                  <input type="checkbox" style="width: 18px; height: 18px; accent-color: var(--admin-accent);">
+                  <span style="font-size: 0.9rem;">Weekly sales reports</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                  <input type="checkbox" checked style="width: 18px; height: 18px; accent-color: var(--admin-accent);">
+                  <span style="font-size: 0.9rem;">Product review notifications</span>
+                </label>
+              </div>
+              <div style="margin-top: 20px;">
+                <button type="submit" class="admin-btn admin-btn-primary">Save Changes</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Security -->
+          <div class="form-card">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+              🔒 Security
+            </h3>
+            <form onsubmit="event.preventDefault(); showAdminToast('Security settings saved!');">
+              <div class="admin-form-group">
+                <label>Current Password</label>
+                <input type="password" placeholder="••••••••">
+              </div>
+              <div class="admin-form-group">
+                <label>New Password</label>
+                <input type="password" placeholder="••••••••">
+              </div>
+              <div class="admin-form-group">
+                <label>Confirm New Password</label>
+                <input type="password" placeholder="••••••••">
+              </div>
+              <div class="admin-form-group">
+                <label>Two-Factor Authentication</label>
+                <select>
+                  <option>Disabled</option>
+                  <option selected>Enabled (SMS)</option>
+                  <option>Enabled (Authenticator App)</option>
+                </select>
+              </div>
+              <button type="submit" class="admin-btn admin-btn-primary">Update Security</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Shipping Regions -->
+        <div class="table-card" style="margin-top: 16px;">
+          <div class="table-header">
+            <h3>Shipping Regions & Rates</h3>
+            <button class="admin-btn admin-btn-sm admin-btn-primary" onclick="showAdminToast('Add region form opened')">+ Add Region</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Region</th>
+                  <th>Countries</th>
+                  <th>Shipping Method</th>
+                  <th>Cost</th>
+                  <th>Delivery Time</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Asia Pacific</strong></td>
+                  <td>China, Japan, Singapore, Malaysia, Thailand, Vietnam</td>
+                  <td>Express</td>
+                  <td>$15.00</td>
+                  <td>3-5 days</td>
+                  <td><span class="status-badge active">Active</span></td>
+                  <td><div class="action-btns"><div class="action-btn">✏️</div><div class="action-btn danger">🗑</div></div></td>
+                </tr>
+                <tr>
+                  <td><strong>North America</strong></td>
+                  <td>United States, Canada, Mexico</td>
+                  <td>Express</td>
+                  <td>$25.00</td>
+                  <td>5-7 days</td>
+                  <td><span class="status-badge active">Active</span></td>
+                  <td><div class="action-btns"><div class="action-btn">✏️</div><div class="action-btn danger">🗑</div></div></td>
+                </tr>
+                <tr>
+                  <td><strong>Europe</strong></td>
+                  <td>UK, Germany, France, Spain, Italy, Netherlands</td>
+                  <td>Express</td>
+                  <td>$30.00</td>
+                  <td>5-10 days</td>
+                  <td><span class="status-badge active">Active</span></td>
+                  <td><div class="action-btns"><div class="action-btn">✏️</div><div class="action-btn danger">🗑</div></div></td>
+                </tr>
+                <tr>
+                  <td><strong>Middle East</strong></td>
+                  <td>UAE, Saudi Arabia, Qatar, Kuwait</td>
+                  <td>Standard</td>
+                  <td>$35.00</td>
+                  <td>7-14 days</td>
+                  <td><span class="status-badge active">Active</span></td>
+                  <td><div class="action-btns"><div class="action-btn">✏️</div><div class="action-btn danger">🗑</div></div></td>
+                </tr>
+                <tr>
+                  <td><strong>South America</strong></td>
+                  <td>Brazil, Argentina, Chile, Colombia</td>
+                  <td>Standard</td>
+                  <td>$40.00</td>
+                  <td>10-20 days</td>
+                  <td><span class="status-badge inactive">Inactive</span></td>
+                  <td><div class="action-btns"><div class="action-btn">✏️</div><div class="action-btn danger">🗑</div></div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    renderSidebar('settings');
+  </script>
+</body>
+</html>

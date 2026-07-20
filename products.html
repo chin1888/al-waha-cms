@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products - AL-WAHA | Make Joy Happen</title>
+  <meta name="description" content="Explore AL-WAHA's full range of premium vape products including disposables and pod systems.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="products">
+
+  <div id="age-modal-container"></div>
+  <div id="navbar-container"></div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="container">
+      <h1 data-cms="products._pageTitle" data-cms-auto-gradient>Our Products</h1>
+      <p data-cms="products._pageDesc">Discover the full range of AL-WAHA premium vaping devices — engineered for performance, designed for life.</p>
+    </div>
+  </div>
+
+  <!-- Filter + Search Bar -->
+  <section style="padding: var(--space-xl) 0 0 0;">
+    <div class="container">
+      <div class="filter-bar">
+        <div class="filter-tags" id="filterTags">
+          <button class="filter-tag active" data-filter="all">All Products</button>
+        </div>
+        <div class="search-box">
+          <span class="search-icon">&#128269;</span>
+          <input type="text" id="productSearch" placeholder="Search products...">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products by Series -->
+  <section style="padding: var(--space-xl) 0 var(--space-3xl) 0;">
+    <div class="container" id="productsContainer"></div>
+    <div id="noResults" style="display: none; text-align: center; padding: 80px 0;">
+      <div style="font-size: 3rem; margin-bottom: 16px;">&#128269;</div>
+      <h3 style="font-size: 1.5rem; margin-bottom: 8px; color: var(--text-primary);">No products found</h3>
+      <p style="color: var(--text-secondary);">Try adjusting your filters or search terms.</p>
+    </div>
+  </section>
+
+  <!-- Features Bar -->
+  <section style="background: var(--bg-secondary); padding: var(--space-2xl) 0; border-top: 1px solid var(--border-color);">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature-card" style="text-align: left;">
+          <div class="feature-icon" style="background: rgba(108, 60, 224, 0.08); margin: 0 0 16px 0;">&#128666;</div>
+          <h3 class="feature-title">Global Shipping</h3>
+          <p class="feature-desc">Fast and reliable shipping to 30+ countries worldwide.</p>
+        </div>
+        <div class="feature-card" style="text-align: left;">
+          <div class="feature-icon" style="background: rgba(236, 72, 153, 0.08); margin: 0 0 16px 0;">&#9989;</div>
+          <h3 class="feature-title">Authenticity Guaranteed</h3>
+          <p class="feature-desc">Every product comes with a verification code. 100% genuine.</p>
+        </div>
+        <div class="feature-card" style="text-align: left;">
+          <div class="feature-icon" style="background: rgba(6, 182, 212, 0.08); margin: 0 0 16px 0;">&#128295;</div>
+          <h3 class="feature-title">Warranty Support</h3>
+          <p class="feature-desc">Comprehensive warranty coverage on all AL-WAHA devices.</p>
+        </div>
+        <div class="feature-card" style="text-align: left;">
+          <div class="feature-icon" style="background: rgba(16, 185, 129, 0.08); margin: 0 0 16px 0;">&#128172;</div>
+          <h3 class="feature-title">24/7 Support</h3>
+          <p class="feature-desc">Our customer support team is always here to help.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-container"></div>
+
+  <script src="js/content-store.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      await CMS.init();
+      CMS.applyToPage();
+
+      var currentFilter = 'all';
+      var searchQuery = '';
+      var products = await CMS.getAllProducts();
+
+      // Group products by series
+      function getSeriesOrder(series) {
+        var order = ['Gear', 'Star', 'Vista', 'Rave', 'Neon', 'Ace', 'Nex', 'Joygo', 'Switch', 'Magic'];
+        var idx = order.indexOf(series);
+        return idx === -1 ? 999 : idx;
+      }
+
+      // Build filter tags from actual product categories
+      function buildFilterTags() {
+        var categories = [];
+        products.forEach(function(p) {
+          if (p.category && categories.indexOf(p.category) === -1) {
+            categories.push(p.category);
+          }
+        });
+        var tagsContainer = document.getElementById('filterTags');
+        categories.forEach(function(cat) {
+          var btn = document.createElement('button');
+          btn.className = 'filter-tag';
+          btn.dataset.filter = cat;
+          btn.textContent = cat;
+          tagsContainer.appendChild(btn);
+        });
+
+        // Bind filter events
+        tagsContainer.querySelectorAll('.filter-tag').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            tagsContainer.querySelectorAll('.filter-tag').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderProducts();
+          });
+        });
+      }
+
+      function renderProductCard(product) {
+        return '<div class="product-card reveal" onclick="window.location.href=\'product-detail.html?id=' + product.id + '\'">' +
+          (product.badge ? '<div class="product-badge">' + product.badge + '</div>' : '') +
+          '<div class="product-image">' +
+            (product.image && (product.image.match(/^https?:\/\//) || product.image.match(/^data:/))
+              ? '<img src="' + product.image + '" alt="' + product.name + '" loading="lazy">'
+              : '<div class="product-visual" style="background: ' + (product.gradient || 'linear-gradient(135deg, #667eea, #764ba2)') + ';">' + (product.image || product.name.charAt(0)) + '</div>'
+            ) +
+          '</div>' +
+          '<div class="product-info">' +
+            '<div class="product-category">' + product.category + '</div>' +
+            '<h3 class="product-name">' + product.name + '</h3>' +
+            '<p class="product-desc">' + product.desc + '</p>' +
+            '<div class="product-meta">' +
+              '<span class="product-puffs">' + product.puffs + '</span>' +
+              '<span class="product-link">Learn More &rarr;</span>' +
+            '</div>' +
+          '</div></div>';
+      }
+
+      function renderProducts() {
+        var container = document.getElementById('productsContainer');
+        var noResults = document.getElementById('noResults');
+
+        // Filter
+        var filtered = products.filter(function(p) {
+          var matchFilter = currentFilter === 'all' || p.category === currentFilter;
+          var matchSearch = !searchQuery ||
+            p.name.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
+            p.desc.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
+            p.series.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1;
+          return matchFilter && matchSearch;
+        });
+
+        if (filtered.length === 0) {
+          container.style.display = 'none';
+          noResults.style.display = 'block';
+          return;
+        }
+
+        container.style.display = 'block';
+        noResults.style.display = 'none';
+
+        // Group by series
+        var seriesMap = {};
+        filtered.forEach(function(p) {
+          var s = p.series || 'Other';
+          if (!seriesMap[s]) seriesMap[s] = [];
+          seriesMap[s].push(p);
+        });
+
+        var seriesNames = Object.keys(seriesMap).sort(function(a, b) {
+          return getSeriesOrder(a) - getSeriesOrder(b);
+        });
+
+        var html = '';
+        seriesNames.forEach(function(series) {
+          var items = seriesMap[series];
+          html += '<div class="series-section">';
+          html += '<div class="series-header">';
+          html += '<h2 class="series-name">' + series + ' Series</h2>';
+          html += '<span class="series-count">' + items.length + ' product' + (items.length > 1 ? 's' : '') + '</span>';
+          html += '</div>';
+          html += '<div class="product-grid">';
+          html += items.map(renderProductCard).join('');
+          html += '</div>';
+          html += '</div>';
+        });
+
+        container.innerHTML = html;
+        setTimeout(initScrollReveal, 100);
+      }
+
+      // Search
+      document.getElementById('productSearch').addEventListener('input', function(e) {
+        searchQuery = e.target.value;
+        renderProducts();
+      });
+
+      // Init
+      buildFilterTags();
+      renderProducts();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact - AL-WAHA | Make Joy Happen</title>
+  <meta name="description" content="Get in touch with AL-WAHA. We're here to help with any questions about our products or services.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .contact-page {
+      padding: calc(var(--nav-height) + 56px) 24px 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .contact-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .contact-header h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    .contact-header p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+    .contact-layout {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 40px;
+      align-items: start;
+    }
+    /* ---- Form Card ---- */
+    .contact-form-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 40px;
+    }
+    .contact-form-card h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+    .contact-form-card .form-subtitle {
+      font-size: 0.9rem;
+      color: #6b7280;
+      margin-bottom: 28px;
+    }
+    .contact-form-card .form-group {
+      margin-bottom: 20px;
+    }
+    .contact-form-card label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+      letter-spacing: 0.01em;
+    }
+    .contact-form-card input,
+    .contact-form-card select,
+    .contact-form-card textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: #111827;
+      background: #fafafa;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .contact-form-card input:focus,
+    .contact-form-card select:focus,
+    .contact-form-card textarea:focus {
+      border-color: #a855f7;
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.08);
+      background: #fff;
+    }
+    .contact-form-card textarea {
+      min-height: 130px;
+      resize: vertical;
+    }
+    .contact-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .contact-submit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.01em;
+    }
+    .contact-submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(124,58,237,0.3);
+    }
+
+    /* ---- Info Card ---- */
+    .contact-info-card-new {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 36px 32px;
+    }
+    .contact-info-card-new h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 24px;
+    }
+    .contact-info-row {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 24px;
+      align-items: flex-start;
+    }
+    .contact-info-row .ci-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+    }
+    .contact-info-row .ci-text h4 {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+    .contact-info-row .ci-text p {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: #1f2937;
+      line-height: 1.5;
+      margin: 0;
+    }
+    .contact-social {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 1px solid #f3f4f6;
+    }
+    .contact-social h4 {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .contact-social-links {
+      display: flex;
+      gap: 10px;
+    }
+    .contact-social-links a {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      font-size: 1.1rem;
+      color: #6b7280;
+      transition: all 0.2s;
+    }
+    .contact-social-links a:hover {
+      background: #7c3aed;
+      color: #fff;
+    }
+
+    @media (max-width: 768px) {
+      .contact-layout {
+        grid-template-columns: 1fr;
+      }
+      .contact-form-card {
+        padding: 28px 20px;
+      }
+      .contact-form-row {
+        grid-template-columns: 1fr;
+      }
+      .contact-page {
+        padding: calc(var(--nav-height) + 32px) 16px 60px;
+      }
+    }
+  </style>
+</head>
+<body data-page="contact">
+
+  <div id="age-modal-container"></div>
+  <div id="navbar-container"></div>
+
+  <div class="contact-page">
+    <div class="contact-header">
+      <h1 data-cms="contact._heroTitle">Get in Touch</h1>
+      <p data-cms="contact._heroDesc">Have a question? Want to become a distributor? We'd love to hear from you.</p>
+    </div>
+
+    <div class="contact-layout">
+      <!-- Left: Contact Form -->
+      <div class="contact-form-card reveal">
+        <h2>Send Us a Message</h2>
+        <p class="form-subtitle">Fill out the form below and we'll get back to you within 24 hours.</p>
+        <form onsubmit="handleContactSubmit(event)" id="contactForm">
+          <div class="contact-form-row">
+            <div class="form-group">
+              <label>Name *</label>
+              <input type="text" name="name" placeholder="Your full name" required>
+            </div>
+            <div class="form-group">
+              <label>Email *</label>
+              <input type="email" name="email" placeholder="your@email.com" required>
+            </div>
+          </div>
+          <div class="contact-form-row">
+            <div class="form-group">
+              <label>Phone / WhatsApp</label>
+              <input type="tel" name="phone" placeholder="+1 234 567 890">
+            </div>
+            <div class="form-group">
+              <label>Country</label>
+              <select name="country">
+                <option value="">Select your country</option>
+                <option>United States</option><option>United Kingdom</option><option>China</option><option>Japan</option><option>Singapore</option><option>Germany</option><option>United Arab Emirates</option><option>Thailand</option><option>Vietnam</option><option>Malaysia</option><option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Your Request / Inquiry / Suggestion *</label>
+            <textarea name="message" placeholder="Tell us how we can help you..." required></textarea>
+          </div>
+          <button type="submit" class="contact-submit-btn">Send Message →</button>
+        </form>
+      </div>
+
+      <!-- Right: Contact Info -->
+      <div class="contact-info-card-new reveal">
+        <h2>Contact Information</h2>
+
+        <div class="contact-info-row">
+          <div class="ci-icon" style="background: rgba(124,58,237,0.1);">&#127968;</div>
+          <div class="ci-text">
+            <h4>Headquarters</h4>
+            <p data-cms="contact._address">Shenzhen, Guangdong Province, China</p>
+          </div>
+        </div>
+
+        <div class="contact-info-row">
+          <div class="ci-icon" style="background: rgba(236,72,153,0.1);">&#9993;</div>
+          <div class="ci-text">
+            <h4>Email</h4>
+            <p data-cms="contact._email">support@al-waha.com</p>
+            <p style="font-size:0.82rem;color:#9ca3af;margin-top:2px;">business@al-waha.com</p>
+          </div>
+        </div>
+
+        <div class="contact-info-row">
+          <div class="ci-icon" style="background: rgba(6,182,212,0.1);">&#9742;</div>
+          <div class="ci-text">
+            <h4>Phone</h4>
+            <p data-cms="contact._phone">+86 755 8888 8888</p>
+          </div>
+        </div>
+
+        <div class="contact-info-row">
+          <div class="ci-icon" style="background: rgba(16,185,129,0.1);">&#128338;</div>
+          <div class="ci-text">
+            <h4>Business Hours</h4>
+            <p>Mon – Fri: 9:00 AM – 6:00 PM (CST)</p>
+          </div>
+        </div>
+
+        <div class="contact-social">
+          <h4>Follow Us</h4>
+          <div class="contact-social-links">
+            <a href="#" title="Instagram">&#128247;</a>
+            <a href="#" title="Twitter">&#128038;</a>
+            <a href="#" title="Facebook">&#128216;</a>
+            <a href="#" title="YouTube">&#9654;</a>
+            <a href="#" title="WhatsApp">&#128172;</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-container"></div>
+
+  <script src="js/content-store.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      await CMS.init();
+      CMS.applyToPage();
+      setTimeout(initScrollReveal, 100);
+    });
+
+    async function handleContactSubmit(e) {
+      e.preventDefault();
+      var form = e.target;
+      var data = {
+        name: form.querySelector('[name="name"]').value.trim(),
+        email: form.querySelector('[name="email"]').value.trim(),
+        phone: form.querySelector('[name="phone"]').value.trim(),
+        country: form.querySelector('[name="country"]').value,
+        message: form.querySelector('[name="message"]').value.trim()
+      };
+      var btn = form.querySelector('.contact-submit-btn');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+      var ok = await CMS.submitContact(data);
+      if (ok) {
+        showToast('Message sent! We will get back to you within 24 hours.');
+        form.reset();
+      } else {
+        showToast('Failed to send. Please try again.');
+      }
+      btn.textContent = 'Send Message →';
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>

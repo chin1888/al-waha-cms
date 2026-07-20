@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Products - AL-WAHA CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-icon-btn" id="menuToggle" style="display:none;" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <h1 data-i18n="prod_title">产品管理</h1>
+        </div>
+        <div class="topbar-right">
+          <button class="admin-btn admin-btn-primary" id="addProductBtn" data-i18n="prod_new">+ 新建产品</button>
+          <a href="../products.html" class="admin-btn admin-btn-sm" target="_blank" data-i18n="prod_view_page">查看产品页面 ↗</a>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="table-card">
+          <div class="table-header">
+            <h3 id="productCount"></h3>
+            <div class="table-actions">
+              <input type="text" data-i18n-placeholder="prod_search" placeholder="搜索产品..." id="productSearch" style="padding:6px 12px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text);font-size:0.85rem;width:200px;">
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="prod_table_product">产品</th>
+                  <th data-i18n="prod_table_category">分类</th>
+                  <th data-i18n="prod_table_badge">标签</th>
+                  <th data-i18n="prod_table_puffs">口数</th>
+                  <th data-i18n="prod_table_image">图片</th>
+                  <th data-i18n="prod_table_video">视频</th>
+                  <th data-i18n="prod_table_actions">操作</th>
+                </tr>
+              </thead>
+              <tbody id="productTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-modal hidden" id="productModal">
+        <div class="admin-modal-content" style="max-width:700px;">
+          <div class="admin-modal-header">
+            <h3 id="modalTitle"></h3>
+            <button class="admin-modal-close" onclick="closeProductModal()">✕</button>
+          </div>
+          <form id="productForm" onsubmit="saveProduct(event)">
+            <input type="hidden" id="prodId">
+            <div class="admin-form-row">
+              <div class="admin-form-group">
+                <label data-i18n="prod_name_required">产品名称 *</label>
+                <input type="text" id="prodName" required placeholder="e.g. NEX MAX">
+              </div>
+              <div class="admin-form-group">
+                <label data-i18n="prod_series">系列</label>
+                <input type="text" id="prodSeries" placeholder="e.g. NEX Series">
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-form-group">
+                <label data-i18n="prod_category_required">分类 *</label>
+                <select id="prodCategory" required>
+                  <option value="100K">100K</option>
+                  <option value="200K">200K</option>
+                  <option value="250K">250K</option>
+                </select>
+              </div>
+              <div class="admin-form-group">
+                <label data-i18n="prod_badge">标签</label>
+                <select id="prodBadge">
+                  <option value="">None</option>
+                  <option value="NEW">NEW</option>
+                  <option value="HOT">HOT</option>
+                </select>
+              </div>
+            </div>
+            <div class="admin-form-group">
+              <label data-i18n="prod_detail_content">产品详情内容</label>
+              <div style="display:flex;align-items:flex-start;gap:8px;">
+                <textarea id="prodDetailContent" rows="10" placeholder="Full product detail — describe the product in depth. Supports HTML...&#10;&#10;Tip: Click 📷 to upload and insert images." style="flex:1;"></textarea>
+                <button type="button" class="admin-btn admin-btn-sm" style="white-space:nowrap;" onclick="uploadToDetailContent()" title="Upload image into detail content">📷 图片</button>
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-form-group"><label data-i18n="prod_puffs">口数</label><input type="text" id="prodPuffs" placeholder="e.g. 20000 Puffs"></div>
+              <div class="admin-form-group"><label data-i18n="prod_nicotine">尼古丁</label><input type="text" id="prodNicotine" placeholder="e.g. 5% (50mg)"></div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-form-group"><label data-i18n="prod_battery">电池</label><input type="text" id="prodBattery" placeholder="e.g. 850mAh"></div>
+              <div class="admin-form-group"><label data-i18n="prod_capacity">烟油容量</label><input type="text" id="prodCapacity" placeholder="e.g. 20ml"></div>
+            </div>
+            <div class="admin-form-row" id="resistanceRow">
+              <div class="admin-form-group"><label id="resistanceLabel" data-i18n="prod_resistance">电阻</label><input type="text" id="prodResistance" placeholder="e.g. 0.6Ω"></div>
+              <div class="admin-form-group"><label data-i18n="prod_charging">充电口</label><input type="text" id="prodCharging" placeholder="e.g. Type-C"></div>
+            </div>
+            <div class="admin-form-group">
+              <label data-i18n="prod_gradient">渐变色 CSS</label>
+              <input type="text" id="prodGradient" placeholder="linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)">
+            </div>
+            <div class="admin-form-group">
+              <label data-i18n="prod_flavors">口味（逗号分隔）</label>
+              <textarea id="prodFlavors" rows="2" placeholder="Blue Razz Ice, Watermelon Bubblegum, ..."></textarea>
+            </div>
+            <div class="admin-form-group">
+              <label data-i18n="prod_features">特性（逗号分隔）</label>
+              <textarea id="prodFeatures" rows="2" placeholder="Touch Control, Mesh Coil, LED Display"></textarea>
+            </div>
+            <div class="admin-form-group">
+              <label data-i18n="prod_image">产品图片</label>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div id="prodImagePreview" style="width:100px;height:80px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;"></div>
+                <input type="text" id="prodImage" placeholder="Image URL or base64..." style="flex:1;">
+                <button type="button" class="admin-btn admin-btn-sm" onclick="uploadMedia('image/*', function(b64){document.getElementById('prodImage').value=b64;updateImagePreview();})">📷 Upload</button>
+              </div>
+            </div>
+            <div class="admin-form-group">
+              <label data-i18n="prod_detail_images">详情图片</label>
+              <div class="product-images-list" id="detailImagesList"></div>
+              <button type="button" class="admin-btn admin-btn-sm" style="margin-top:8px;" onclick="addDetailImage()" data-i18n="prod_add_image">+ 添加图片</button>
+            </div>
+            <div class="admin-form-group">
+              <label data-i18n="prod_video">产品视频</label>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div id="prodVideoPreview" style="width:100px;height:80px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:0.7rem;color:var(--admin-text-tertiary);">No video</div>
+                <input type="text" id="prodVideo" placeholder="Video URL or base64..." style="flex:1;">
+                <button type="button" class="admin-btn admin-btn-sm" onclick="uploadMedia('video/*', function(b64){document.getElementById('prodVideo').value=b64;updateVideoPreview();})">🎬 Upload</button>
+              </div>
+            </div>
+            <div class="admin-modal-footer">
+              <button type="button" class="admin-btn" onclick="closeProductModal()" data-i18n="prod_cancel">取消</button>
+              <button type="submit" class="admin-btn admin-btn-primary" data-i18n="prod_save">保存产品</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/content-store.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    renderSidebar('products');
+
+    var editingId = null;
+    var detailImages = [];
+
+    function updateImagePreview() {
+      var val = document.getElementById('prodImage').value;
+      var preview = document.getElementById('prodImagePreview');
+      var t = I18N.t;
+      if (val && (val.match(/^https?:\/\//) || val.match(/^data:/))) {
+        preview.innerHTML = '<img src="' + val + '" style="max-width:100%;max-height:100%;object-fit:cover;">';
+      } else if (val) {
+        preview.innerHTML = '<span style="font-weight:700;font-size:1.2rem;">' + val + '</span>';
+      } else {
+        preview.innerHTML = '<span style="color:var(--admin-text-tertiary);font-size:0.7rem;">' + t('prod_no_image') + '</span>';
+      }
+    }
+
+    function updateVideoPreview() {
+      var val = document.getElementById('prodVideo').value;
+      var preview = document.getElementById('prodVideoPreview');
+      if (val) {
+        preview.innerHTML = '<video src="' + val + '" style="max-width:100%;max-height:100%;"></video>';
+      } else {
+        preview.innerHTML = 'No video';
+      }
+    }
+
+    function addDetailImage(url) {
+      var url = url || '';
+      if (!url) {
+        uploadMedia('image/*', function(b64) {
+          detailImages.push(b64);
+          renderDetailImages();
+        });
+      } else {
+        detailImages.push(url);
+        renderDetailImages();
+      }
+    }
+
+    function removeDetailImage(idx) {
+      detailImages.splice(idx, 1);
+      renderDetailImages();
+    }
+
+    function renderDetailImages() {
+      var container = document.getElementById('detailImagesList');
+      container.innerHTML = detailImages.map(function(img, i) {
+        return '<div class="img-item"><img src="' + img + '" onerror="this.parentElement.style.display=\'none\'"><div class="remove-btn" onclick="removeDetailImage(' + i + ')">✕</div></div>';
+      }).join('') + '<div class="add-img-btn" onclick="addDetailImage()">+</div>';
+    }
+
+    function openProductModal(product) {
+      var t = I18N.t;
+      editingId = product ? product.id : null;
+      detailImages = product && product.images ? (typeof product.images === 'string' ? JSON.parse(product.images || '[]') : [...product.images]) : [];
+      var specs = product ? (product.specs || {}) : {};
+      document.getElementById('modalTitle').textContent = product ? t('prod_edit_title') : t('prod_new_title');
+      document.getElementById('prodId').value = product ? product.id : '';
+      document.getElementById('prodName').value = product ? product.name : '';
+      document.getElementById('prodSeries').value = product ? product.series : '';
+      document.getElementById('prodCategory').value = product ? product.category : '100K';
+      document.getElementById('prodBadge').value = product ? product.badge : '';
+      document.getElementById('prodDetailContent').value = product ? (product.detail_content || '') : '';
+      document.getElementById('prodPuffs').value = specs.puffs || (product ? product.puffs : '');
+      document.getElementById('prodNicotine').value = specs.nicotine || (product ? product.nicotine : '');
+      document.getElementById('prodBattery').value = specs.battery || (product ? product.battery : '');
+      document.getElementById('prodCapacity').value = specs.capacity || (product ? product.capacity : '');
+      document.getElementById('prodResistance').value = specs.resistance || (product ? product.resistance : '');
+      document.getElementById('prodCharging').value = specs.charging || (product ? product.charging : '');
+      document.getElementById('prodGradient').value = product ? product.gradient : '';
+      var flavors = product ? (Array.isArray(product.flavors) ? product.flavors : (typeof product.flavors === 'string' ? JSON.parse(product.flavors || '[]') : [])) : [];
+      document.getElementById('prodFlavors').value = flavors.join(', ');
+      var features = product ? (Array.isArray(product.features) ? product.features : (typeof product.features === 'string' ? JSON.parse(product.features || '[]') : [])) : [];
+      document.getElementById('prodFeatures').value = features.join(', ');
+      document.getElementById('prodImage').value = product ? (product.image || '') : '';
+      document.getElementById('prodVideo').value = product ? (product.video || '') : '';
+      updateImagePreview();
+      updateVideoPreview();
+      renderDetailImages();
+      // Toggle resistance row based on category
+      var category = document.getElementById('prodCategory').value;
+      toggleResistanceRow(category);
+      document.getElementById('productModal').classList.remove('hidden');
+    }
+
+    function toggleResistanceRow(category) {
+      var row = document.getElementById('resistanceRow');
+      var label = document.getElementById('resistanceLabel');
+      if (category === '200K' || category === '250K') {
+        row.style.display = 'none';
+      } else {
+        row.style.display = '';
+        if (category === '100K') {
+          label.textContent = I18N.t('prod_perfume_capacity') || '香水容量';
+          document.getElementById('prodResistance').placeholder = 'e.g. 15ml';
+        } else {
+          label.textContent = I18N.t('prod_resistance') || '电阻';
+          document.getElementById('prodResistance').placeholder = 'e.g. 0.6Ω';
+        }
+      }
+    }
+
+    // Listen for category change to toggle resistance row
+    document.getElementById('prodCategory').addEventListener('change', function() {
+      toggleResistanceRow(this.value);
+    });
+
+    // Upload image and insert into detail_content textarea
+    function uploadToDetailContent() {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        // Upload via FormData to API
+        var formData = new FormData();
+        formData.append('file', file);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://localhost:3001/api/upload', true);
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            var resp = JSON.parse(xhr.responseText);
+            var url = 'http://localhost:3001' + resp.url;
+            var textarea = document.getElementById('prodDetailContent');
+            var imgMarkdown = '<img src="' + url + '" alt="' + (file.name || 'image') + '" style="max-width:100%;border-radius:8px;">';
+            // Insert at cursor position
+            var start = textarea.selectionStart;
+            var end = textarea.selectionEnd;
+            var before = textarea.value.substring(0, start);
+            var after = textarea.value.substring(end);
+            textarea.value = before + imgMarkdown + after;
+            textarea.focus();
+            textarea.setSelectionRange(start + imgMarkdown.length, start + imgMarkdown.length);
+            showAdminToast('Image inserted into detail content');
+          } else {
+            showAdminToast('Upload failed', 'error');
+          }
+        };
+        xhr.onerror = function() {
+          showAdminToast('Upload failed — check API server', 'error');
+        };
+        xhr.send(formData);
+      };
+      input.click();
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').classList.add('hidden');
+    }
+
+    async function saveProduct(e) {
+      e.preventDefault();
+      var t = (typeof I18N !== 'undefined' && I18N.t) ? I18N.t : function(k) { return k; };
+      try {
+        var data = {
+          name: document.getElementById('prodName').value,
+          series: document.getElementById('prodSeries').value,
+          category: document.getElementById('prodCategory').value,
+          badge: document.getElementById('prodBadge').value,
+          detail_content: document.getElementById('prodDetailContent').value,
+          specs: JSON.stringify({
+            puffs: document.getElementById('prodPuffs').value,
+            nicotine: document.getElementById('prodNicotine').value,
+            battery: document.getElementById('prodBattery').value,
+            capacity: document.getElementById('prodCapacity').value,
+            resistance: document.getElementById('prodResistance').value,
+            charging: document.getElementById('prodCharging').value
+          }),
+          gradient: document.getElementById('prodGradient').value,
+          flavors: JSON.stringify(document.getElementById('prodFlavors').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean)),
+          features: JSON.stringify(document.getElementById('prodFeatures').value.split(',').map(function(s) { return s.trim(); }).filter(Boolean)),
+          image: document.getElementById('prodImage').value,
+          images: JSON.stringify(detailImages),
+          video: document.getElementById('prodVideo').value
+        };
+
+        var ok;
+        if (editingId) {
+          ok = await CMS.updateProduct(editingId, data);
+          if (ok) showAdminToast(t('prod_updated'));
+          else showAdminToast(t('prod_save_failed') || 'Save failed', 'error');
+        } else {
+          data.image = data.image || '';
+          const result = await CMS.addProduct(data);
+          if (result) showAdminToast(t('prod_created'));
+          else showAdminToast(t('prod_save_failed') || 'Save failed', 'error');
+        }
+      } catch (err) {
+        console.error('Save product failed:', err);
+        showAdminToast(t('prod_save_failed') || 'Save failed', 'error');
+      }
+      // Always close modal and refresh list
+      closeProductModal();
+      await renderProducts();
+    }
+
+    function deleteProduct(id) {
+      confirmDialog(I18N.t('prod_delete_confirm'), async function() {
+        await CMS.deleteProduct(id);
+        showAdminToast(I18N.t('prod_deleted'));
+        renderProducts();
+      });
+    }
+
+    async function editProductById(id) {
+      var products = await CMS.getAllProducts();
+      var product = products.find(function(p) { return p.id === id; });
+      if (product) openProductModal(product);
+    }
+
+    async function renderProducts() {
+      var t = I18N.t;
+      var products = await CMS.getAllProducts();
+      var search = (document.getElementById('productSearch').value || '').toLowerCase();
+      if (search) {
+        products = products.filter(function(p) {
+          return p.name.toLowerCase().indexOf(search) !== -1 || p.series.toLowerCase().indexOf(search) !== -1;
+        });
+      }
+
+      document.getElementById('productCount').textContent = t('prod_count') + ' (' + products.length + ')';
+      document.getElementById('productTableBody').innerHTML = products.map(function(p) {
+        var miniImgHtml = (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/)))
+          ? '<img src="' + p.image + '" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" alt="' + p.name + '">'
+          : (p.image || p.name.charAt(0));
+        return '<tr>' +
+          '<td><div class="table-product"><div class="product-mini" style="background:' + (p.gradient || '') + ';">' + miniImgHtml + '</div><div><div class="product-name">' + p.name + '</div><div class="product-cat">' + p.series + '</div></div></div></td>' +
+          '<td>' + p.category + '</td>' +
+          '<td>' + (p.badge ? '<span class="status-badge active">' + p.badge + '</span>' : '—') + '</td>' +
+          '<td>' + ((p.specs && p.specs.puffs) || p.puffs || '—') + '</td>' +
+          '<td>' + (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/)) ? '🖼️ ' + t('prod_has_image') : (p.image || '—')) + '</td>' +
+          '<td>' + (p.video ? '🎬 ' + t('prod_has_video') : '—') + '</td>' +
+          '<td><div class="action-btns">' +
+          '<button class="action-btn edit-product-btn" title="Edit" data-product-id="' + p.id + '">✏️</button>' +
+          '<button class="action-btn danger delete-product-btn" title="Delete" data-product-id="' + p.id + '">🗑</button>' +
+          '</div></td></tr>';
+      }).join('');
+
+      // Bind click events to edit/delete buttons (avoids JSON in onclick)
+      document.querySelectorAll('.edit-product-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { editProductById(parseInt(this.dataset.productId, 10)); });
+      });
+      document.querySelectorAll('.delete-product-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { deleteProduct(parseInt(this.dataset.productId, 10)); });
+      });
+    }
+
+    document.getElementById('addProductBtn').addEventListener('click', function() { openProductModal(null); });
+    document.getElementById('productSearch').addEventListener('input', renderProducts);
+
+    window._onLangChange = function(lang) {
+      renderSidebar('products');
+      renderProducts();
+      I18N.applyToDOM();
+    };
+
+    renderProducts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Featured Videos - AL-WAHA CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 data-i18n="fv_title">视频管理</h1>
+        </div>
+        <div class="topbar-right">
+          <button class="admin-btn admin-btn-primary" id="addVideoBtn" data-i18n="fv_new">+ 新建视频</button>
+          <a href="../index.html" class="admin-btn admin-btn-sm" target="_blank" data-i18n="fv_view_page">查看首页 ↗</a>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="table-card">
+          <div class="table-header">
+            <h3 id="videoCount"></h3>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:60px;">#</th>
+                  <th data-i18n="fv_table_name">名称</th>
+                  <th data-i18n="fv_table_video" style="width:100px;">视频</th>
+                  <th data-i18n="fv_table_actions" style="width:120px;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="videoTableBody">
+                <tr><td colspan="4" style="text-align:center;color:var(--admin-text-tertiary);padding:40px;" data-i18n="fv_no_videos">暂无视频，点击"+ 新建视频"添加。</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add/Edit Modal -->
+      <div class="admin-modal hidden" id="videoModal">
+        <div class="admin-modal-content" style="max-width:480px;">
+          <div class="admin-modal-header">
+            <h3 id="modalTitle" data-i18n="fv_new_title">新建视频</h3>
+            <button class="admin-modal-close" onclick="closeVideoModal()">✕</button>
+          </div>
+          <form id="videoForm" onsubmit="saveVideo(event)">
+            <input type="hidden" id="videoId">
+            <div class="admin-form-group">
+              <label data-i18n="fv_name_required">名称 *</label>
+              <input type="text" id="videoTitle" required placeholder="e.g. Gear Ice & Sweet">
+            </div>
+            <div class="admin-form-group" id="fvUploadGroup">
+              <label data-i18n="fv_video_required">视频文件 *</label>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <input type="text" id="videoUrl" placeholder="上传视频文件..." style="flex:1;" readonly>
+                <button type="button" class="admin-btn admin-btn-primary" onclick="uploadVideoFile()" data-i18n="fv_upload">上传</button>
+                <input type="file" id="videoFileInput" accept="video/*" style="display:none;" onchange="handleVideoUpload(event)">
+              </div>
+              <small style="color:var(--admin-text-tertiary);" data-i18n="fv_upload_hint">支持: MP4, WebM, MOV (最大50MB)</small>
+            </div>
+            <div class="admin-form-group hidden" id="fvEditGroup">
+              <label>视频地址</label>
+              <input type="text" id="videoUrlEdit" placeholder="视频文件路径或 URL">
+            </div>
+            <div id="videoPreviewWrap" style="display:none;margin-top:12px;">
+              <video id="videoPreview" controls style="width:100%;max-height:200px;border-radius:8px;background:#000;"></video>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px;">
+              <button type="button" class="admin-btn" onclick="closeVideoModal()" data-i18n="common_cancel">取消</button>
+              <button type="submit" class="admin-btn admin-btn-primary" data-i18n="common_confirm">确认</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Delete Confirmation Modal -->
+      <div class="admin-modal hidden" id="deleteModal">
+        <div class="admin-modal-content" style="max-width:440px;">
+          <div class="admin-modal-header">
+            <h3 data-i18n="fv_delete_title">确认删除</h3>
+            <button class="admin-modal-close" onclick="closeDeleteModal()">✕</button>
+          </div>
+          <div style="padding:20px 0;">
+            <p data-i18n="fv_delete_confirm">确定要删除该视频吗？</p>
+            <p style="color:var(--admin-danger);font-weight:600;margin-top:8px;" id="deleteVideoTitle"></p>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:12px;">
+            <button type="button" class="admin-btn" onclick="closeDeleteModal()" data-i18n="common_cancel">取消</button>
+            <button type="button" class="admin-btn admin-btn-danger" id="confirmDeleteBtn" data-i18n="common_confirm">确认</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/content-store.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    var _currentEditId = null;
+    var _deleteTargetId = null;
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      renderSidebar('featured-videos');
+      await CMS.init();
+      document.getElementById('addVideoBtn').onclick = openAddModal;
+      renderVideos();
+    });
+
+    async function renderVideos() {
+      var videos = await CMS.getFeaturedVideos();
+      var tbody = document.getElementById('videoTableBody');
+      var countEl = document.getElementById('videoCount');
+      var t = window.I18N ? I18N.t : function(k) { return k; };
+      countEl.textContent = t('fv_title') + ' (' + videos.length + ')';
+
+      if (videos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--admin-text-tertiary);padding:40px;">' + t('fv_no_videos') + '</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+      videos.forEach(function(v, idx) {
+        var hasVideo = v.video_url && v.video_url.length > 0;
+        tbody.innerHTML +=
+          '<tr>' +
+            '<td>' + (idx + 1) + '</td>' +
+            '<td><strong>' + escapeHtml(v.title) + '</strong></td>' +
+            '<td>' + (hasVideo ? '<span style="color:var(--admin-success);font-size:0.85rem;">' + t('fv_uploaded') + '</span>' : '<span style="color:var(--admin-text-tertiary);">-</span>') + '</td>' +
+            '<td>' +
+              '<button class="admin-btn admin-btn-sm" data-i18n="fv_edit_title" onclick="openEditModal(' + v.id + ')">' + t('fv_edit_title') + '</button> ' +
+              '<button class="admin-btn admin-btn-sm admin-btn-danger" data-i18n="fv_delete_title" onclick="openDeleteModal(' + v.id + ', \'' + escapeAttr(v.title) + '\')">' + t('fv_delete_title') + '</button>' +
+            '</td>' +
+          '</tr>';
+      });
+    }
+
+    function openAddModal() {
+      _currentEditId = null;
+      var t = window.I18N ? I18N.t : function(k) { return k; };
+      document.getElementById('modalTitle').textContent = t('fv_new_title');
+      document.getElementById('videoId').value = '';
+      document.getElementById('videoTitle').value = '';
+      document.getElementById('videoUrl').value = '';
+      document.getElementById('videoPreviewWrap').style.display = 'none';
+      // Show upload mode, hide edit mode
+      document.getElementById('fvUploadGroup').classList.remove('hidden');
+      document.getElementById('fvEditGroup').classList.add('hidden');
+      document.getElementById('videoModal').classList.remove('hidden');
+    }
+
+    function openEditModal(id) {
+      _currentEditId = id;
+      CMS.getFeaturedVideos().then(function(videos) {
+        var v = videos.find(function(x) { return x.id === id; });
+        if (!v) return;
+        var t = window.I18N ? I18N.t : function(k) { return k; };
+        document.getElementById('modalTitle').textContent = t('fv_edit_title');
+        document.getElementById('videoId').value = v.id;
+        document.getElementById('videoTitle').value = v.title;
+        // Hide upload mode, show edit mode with current URL
+        document.getElementById('fvUploadGroup').classList.add('hidden');
+        document.getElementById('fvEditGroup').classList.remove('hidden');
+        document.getElementById('videoUrlEdit').value = v.video_url || '';
+        if (v.video_url) {
+          document.getElementById('videoPreview').src = v.video_url;
+          document.getElementById('videoPreviewWrap').style.display = 'block';
+        } else {
+          document.getElementById('videoPreviewWrap').style.display = 'none';
+        }
+        document.getElementById('videoModal').classList.remove('hidden');
+      });
+    }
+
+    function closeVideoModal() {
+      document.getElementById('videoModal').classList.add('hidden');
+      _currentEditId = null;
+    }
+
+    async function saveVideo(e) {
+      e.preventDefault();
+      var title = document.getElementById('videoTitle').value.trim();
+      // Get video URL from upload field (add mode) or edit field (edit mode)
+      var isEdit = !!_currentEditId;
+      var videoUrl = isEdit
+        ? document.getElementById('videoUrlEdit').value.trim()
+        : document.getElementById('videoUrl').value.trim();
+      if (!title) return;
+
+      var data = { title: title, video_url: videoUrl, description: '', thumbnail: '', sort_order: 0 };
+
+      if (isEdit) {
+        await CMS.updateFeaturedVideo(_currentEditId, data);
+      } else {
+        await CMS.createFeaturedVideo(data);
+      }
+
+      closeVideoModal();
+      renderVideos();
+    }
+
+    function openDeleteModal(id, title) {
+      _deleteTargetId = id;
+      document.getElementById('deleteVideoTitle').textContent = title;
+      document.getElementById('deleteModal').classList.remove('hidden');
+      document.getElementById('confirmDeleteBtn').onclick = async function() {
+        await CMS.deleteFeaturedVideo(_deleteTargetId);
+        closeDeleteModal();
+        renderVideos();
+      };
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.add('hidden');
+      _deleteTargetId = null;
+    }
+
+    function uploadVideoFile() {
+      document.getElementById('videoFileInput').click();
+    }
+
+    async function handleVideoUpload(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var url = await CMS.uploadFile(file);
+      if (url) {
+        document.getElementById('videoUrl').value = url;
+        document.getElementById('videoPreview').src = url;
+        document.getElementById('videoPreviewWrap').style.display = 'block';
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(str) {
+      if (!str) return '';
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+  </script>
+</body>
+</html>

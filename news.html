@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News - AL-WAHA | Make Joy Happen</title>
+  <meta name="description" content="Stay updated with the latest AL-WAHA news, product launches, and company announcements.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="news">
+
+  <div id="age-modal-container"></div>
+  <div id="navbar-container"></div>
+
+  <div class="page-header">
+    <div class="container">
+      <h1 data-cms="news._pageTitle" data-cms-auto-gradient>News &amp; Media</h1>
+      <p data-cms="news._pageDesc">Stay informed about our latest product launches, company news, and industry insights.</p>
+    </div>
+  </div>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="container">
+      <div class="filter-bar">
+        <div class="filter-tags">
+          <button class="filter-tag active" data-filter="all">All News</button>
+          <button class="filter-tag" data-filter="Product Launch">Product Launch</button>
+          <button class="filter-tag" data-filter="Company News">Company News</button>
+          <button class="filter-tag" data-filter="Notice">Notices</button>
+          <button class="filter-tag" data-filter="Awards">Awards</button>
+        </div>
+      </div>
+      <div class="news-grid" id="newsGrid"></div>
+    </div>
+  </section>
+
+  <div id="footer-container"></div>
+
+  <script src="js/content-store.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      await CMS.init();
+      CMS.applyToPage();
+
+      var currentFilter = 'all';
+      var news = await CMS.getAllNews();
+
+      function renderNews() {
+        var grid = document.getElementById('newsGrid');
+        var filtered = currentFilter === 'all' ? news : news.filter(function(n) { return n.category === currentFilter; });
+
+        grid.innerHTML = filtered.map(function(item) {
+          var hasImage = item.image && item.image.length > 0;
+          var bannerStyle = hasImage
+            ? 'background: url(' + item.image + ') center/cover no-repeat;'
+            : 'background: ' + item.gradient + ';';
+          return '<div class="news-card reveal" onclick="location.href=\'news-detail.html?id=' + item.id + '\'">' +
+            '<div class="news-banner" style="' + bannerStyle + '">' +
+            (hasImage ? '' : '<span>' + item.icon + '</span>') +
+            '<span class="news-tag">' + item.category + '</span></div>' +
+            '<div class="news-info"><div class="news-date">' + formatDate(item.date) + '</div>' +
+            '<h3 class="news-title">' + item.title + '</h3><p class="news-excerpt">' + item.excerpt + '</p>' +
+            '<div style="margin-top: 16px; display: flex; align-items: center; gap: 6px; color: var(--accent-pink); font-size: 0.85rem; font-weight: 600;">Read More &rarr;</div>' +
+            '</div></div>';
+        }).join('');
+
+        setTimeout(initScrollReveal, 100);
+      }
+
+      document.querySelectorAll('.filter-tag').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.filter-tag').forEach(function(b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          currentFilter = btn.dataset.filter;
+          renderNews();
+        });
+      });
+
+      renderNews();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orders - AL-WAHA Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-icon-btn" id="menuToggle">☰</button>
+          <h1>Orders</h1>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search orders..." id="searchInput">
+          </div>
+          <button class="topbar-icon-btn">🔔<span class="notification-dot"></span></button>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="page-title">
+          <div>
+            <h2>Order Management</h2>
+            <p>Track and manage all customer orders.</p>
+          </div>
+          <button class="admin-btn admin-btn-primary" onclick="showAdminToast('Exporting orders...')">📥 Export Orders</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon" style="background: rgba(16,185,129,0.15);">✅</div>
+              <div class="stat-trend up">↑ 12%</div>
+            </div>
+            <div class="stat-value">4,321</div>
+            <div class="stat-label">Completed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon" style="background: rgba(59,130,246,0.15);">🔄</div>
+              <div class="stat-trend up">↑ 5%</div>
+            </div>
+            <div class="stat-value">1,728</div>
+            <div class="stat-label">Processing</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon" style="background: rgba(124,58,237,0.15);">🚚</div>
+              <div class="stat-trend up">↑ 8%</div>
+            </div>
+            <div class="stat-value">1,296</div>
+            <div class="stat-label">Shipped</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon" style="background: rgba(251,191,36,0.15);">⏳</div>
+              <div class="stat-trend down">↓ 3%</div>
+            </div>
+            <div class="stat-value">1,297</div>
+            <div class="stat-label">Pending</div>
+          </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="table-card">
+          <div class="table-header">
+            <h3>All Orders</h3>
+            <div class="filter-pills">
+              <button class="filter-pill active" data-filter="all">All</button>
+              <button class="filter-pill" data-filter="completed">Completed</button>
+              <button class="filter-pill" data-filter="processing">Processing</button>
+              <button class="filter-pill" data-filter="shipped">Shipped</button>
+              <button class="filter-pill" data-filter="pending">Pending</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTable"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <div class="pagination-info">Showing 1-${ORDERS_DATA.length} of ${DASHBOARD_STATS.totalOrders.toLocaleString()} orders</div>
+            <div class="pagination-btns">
+              <button class="pagination-btn" disabled>←</button>
+              <button class="pagination-btn active">1</button>
+              <button class="pagination-btn">2</button>
+              <button class="pagination-btn">3</button>
+              <button class="pagination-btn">→</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Detail Modal -->
+  <div class="admin-modal hidden" id="orderDetailModal">
+    <div class="admin-modal-content" style="max-width: 600px;">
+      <div class="admin-modal-header">
+        <h3>Order Details</h3>
+        <div class="admin-modal-close" onclick="closeModal('orderDetailModal')">✕</div>
+      </div>
+      <div id="orderDetailContent"></div>
+      <div class="admin-modal-footer">
+        <select class="admin-btn" style="background: var(--admin-bg);" id="statusSelect">
+          <option value="pending">Pending</option>
+          <option value="processing">Processing</option>
+          <option value="shipped">Shipped</option>
+          <option value="completed">Completed</option>
+        </select>
+        <button class="admin-btn admin-btn-primary" onclick="closeModal('orderDetailModal'); showAdminToast('Order updated successfully!')">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/data.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    renderSidebar('orders');
+
+    let currentFilter = 'all';
+
+    function renderTable() {
+      const tbody = document.getElementById('ordersTable');
+      let filtered = currentFilter === 'all' ? ORDERS_DATA : ORDERS_DATA.filter(o => o.status === currentFilter);
+
+      tbody.innerHTML = filtered.map(order => {
+        const product = PRODUCTS.find(p => p.name === order.product) || PRODUCTS[0];
+        return `
+          <tr>
+            <td style="font-family: monospace; font-size: 0.8rem;">${order.id}</td>
+            <td>${order.customer}</td>
+            <td>
+              <div class="table-product">
+                <div class="product-mini" style="background: ${product.gradient};">${product.image}</div>
+                <div class="product-name">${order.product}</div>
+              </div>
+            </td>
+            <td>${order.quantity} units</td>
+            <td style="font-weight: 600;">${formatCurrency(order.total)}</td>
+            <td><span class="status-badge ${order.status}">${order.status}</span></td>
+            <td style="color: var(--admin-text-tertiary);">${formatDate(order.date)}</td>
+            <td>
+              <div class="action-btns">
+                <div class="action-btn" title="View" onclick="viewOrder('${order.id}')">👁</div>
+                <div class="action-btn" title="Edit" onclick="viewOrder('${order.id}')">✏️</div>
+                <div class="action-btn" title="Print" onclick="showAdminToast('Printing order ${order.id}...')">🖨</div>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function viewOrder(orderId) {
+      const order = ORDERS_DATA.find(o => o.id === orderId);
+      if (!order) return;
+      const product = PRODUCTS.find(p => p.name === order.product) || PRODUCTS[0];
+
+      document.getElementById('orderDetailContent').innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+          <div>
+            <div style="font-size: 0.8rem; color: var(--admin-text-tertiary); margin-bottom: 4px;">Order ID</div>
+            <div style="font-weight: 600; font-family: monospace;">${order.id}</div>
+          </div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--admin-text-tertiary); margin-bottom: 4px;">Date</div>
+            <div style="font-weight: 600;">${formatDate(order.date)}</div>
+          </div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--admin-text-tertiary); margin-bottom: 4px;">Customer</div>
+            <div style="font-weight: 600;">${order.customer}</div>
+          </div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--admin-text-tertiary); margin-bottom: 4px;">Status</div>
+            <span class="status-badge ${order.status}">${order.status}</span>
+          </div>
+        </div>
+        <div style="background: var(--admin-bg); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <div class="product-mini" style="background: ${product.gradient};">${product.image}</div>
+            <div>
+              <div style="font-weight: 600;">${order.product}</div>
+              <div style="font-size: 0.8rem; color: var(--admin-text-tertiary);">${product.series}</div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--admin-border);">
+            <span style="color: var(--admin-text-secondary);">Quantity</span>
+            <span style="font-weight: 600;">${order.quantity} units</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--admin-border);">
+            <span style="color: var(--admin-text-secondary);">Unit Price</span>
+            <span>${formatCurrency(Math.round(order.total / order.quantity))}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--admin-border);">
+            <span style="color: var(--admin-text-secondary);">Subtotal</span>
+            <span>${formatCurrency(order.total)}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--admin-border); font-size: 1.1rem;">
+            <span style="font-weight: 700;">Total</span>
+            <span style="font-weight: 800; color: var(--admin-success);">${formatCurrency(order.total)}</span>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('statusSelect').value = order.status;
+      openModal('orderDetailModal');
+    }
+
+    document.querySelectorAll('.filter-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderTable();
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const tbody = document.getElementById('ordersTable');
+      const filtered = ORDERS_DATA.filter(o =>
+        o.id.toLowerCase().includes(query) ||
+        o.customer.toLowerCase().includes(query) ||
+        o.product.toLowerCase().includes(query)
+      );
+      tbody.innerHTML = filtered.map(order => {
+        const product = PRODUCTS.find(p => p.name === order.product) || PRODUCTS[0];
+        return `
+          <tr>
+            <td style="font-family: monospace; font-size: 0.8rem;">${order.id}</td>
+            <td>${order.customer}</td>
+            <td>
+              <div class="table-product">
+                <div class="product-mini" style="background: ${product.gradient};">${product.image}</div>
+                <div class="product-name">${order.product}</div>
+              </div>
+            </td>
+            <td>${order.quantity} units</td>
+            <td style="font-weight: 600;">${formatCurrency(order.total)}</td>
+            <td><span class="status-badge ${order.status}">${order.status}</span></td>
+            <td style="color: var(--admin-text-tertiary);">${formatDate(order.date)}</td>
+            <td>
+              <div class="action-btns">
+                <div class="action-btn" title="View" onclick="viewOrder('${order.id}')">👁</div>
+                <div class="action-btn" title="Edit" onclick="viewOrder('${order.id}')">✏️</div>
+                <div class="action-btn" title="Print" onclick="showAdminToast('Printing order ${order.id}...')">🖨</div>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    });
+
+    renderTable();
+  </script>
+</body>
+</html>

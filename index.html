@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AL-WAHA | Make Joy Happen - Premium Vape Brand</title>
+  <meta name="description" content="AL-WAHA is an international vape brand devoted to accelerating the world's transition to a smoking-free place.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="home">
+
+  <div id="age-modal-container"></div>
+  <div id="navbar-container"></div>
+
+  <!-- ===== Hero ===== -->
+  <section class="hero hero-fullscreen">
+    <div class="hero-carousel">
+      <div class="hero-carousel-track"></div>
+      <button class="hero-carousel-btn prev" aria-label="Previous">&#10094;</button>
+      <button class="hero-carousel-btn next" aria-label="Next">&#10095;</button>
+      <div class="hero-carousel-dots"></div>
+    </div>
+  </section>
+
+  <!-- ===== Recommended Products ===== -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2 class="section-title" data-cms="home._featuredTitle" data-cms-auto-gradient>Recommended Products</h2>
+      </div>
+      <div class="recommended-grid" id="recommendedProducts"></div>
+      <div style="text-align: center; margin-top: 40px;">
+        <a href="products.html" class="btn btn-ghost btn-lg">View All Products &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Featured Videos ===== -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2 class="section-title" data-cms-auto-gradient>Featured Videos</h2>
+      </div>
+      <div class="fv-carousel-wrap reveal">
+        <button class="fv-carousel-btn fv-prev" aria-label="Previous">&#10094;</button>
+        <div class="fv-carousel-stage" id="featuredVideosStage">
+          <div class="fv-carousel-track" id="featuredVideosTrack"></div>
+        </div>
+        <button class="fv-carousel-btn fv-next" aria-label="Next">&#10095;</button>
+      </div>
+      <div class="fv-carousel-dots" id="fvCarouselDots"></div>
+    </div>
+  </section>
+
+  <!-- Video Popup Modal -->
+  <div class="fv-popup-overlay hidden" id="fvPopupOverlay">
+    <div class="fv-popup-wrapper">
+      <button class="fv-popup-close" id="fvPopupClose">&times;</button>
+      <div class="fv-popup-player" id="fvPopupPlayer"></div>
+    </div>
+  </div>
+
+  <!-- ===== News ===== -->
+  <section class="section" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="section-header reveal">
+        <h2 class="section-title" data-cms="home._newsTitle" data-cms-auto-gradient>News</h2>
+      </div>
+      <div class="news-grid" id="latestNews"></div>
+      <div style="text-align: center; margin-top: 40px;">
+        <a href="news.html" class="btn btn-ghost btn-lg">All News &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== MAKE JOY HAPPEN Hero Banner ===== -->
+  <section class="makejoy-hero">
+    <div class="makejoy-inner">
+      <div class="makejoy-text reveal">
+        <div class="hero-badge" style="margin-bottom: 24px;"><span class="dot"></span> Our Story</div>
+        <h2 data-cms="home._makejoyTitle">MAKE JOY<br>HAPPEN</h2>
+        <p data-cms="home._makejoyDesc">AL-WAHA is an international vape brand devoted to accelerating the world's transition to a smoking-free place.</p>
+        <a data-cms="home._makejoyBtn" data-cms-link="home._makejoyLink" href="about.html" class="btn btn-primary">Learn More</a>
+      </div>
+      <div class="makejoy-collage-wrap">
+        <div class="mj-col mj-col-left"></div>
+        <div class="mj-col mj-col-right"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Product Showcase — Two-Row Bidirectional Marquee ===== -->
+  <section class="makejoy-marquee">
+    <div class="makejoy-marquee-row makejoy-marquee-row-top">
+      <div class="makejoy-marquee-track" id="makejoyMarqueeTop">
+        <!-- JS injected: product images (duplicated for seamless loop) -->
+      </div>
+    </div>
+    <div class="makejoy-marquee-row makejoy-marquee-row-bottom">
+      <div class="makejoy-marquee-track" id="makejoyMarqueeBottom">
+        <!-- JS injected: product images (duplicated for seamless loop) -->
+      </div>
+    </div>
+  </section>
+
+  <div id="footer-container"></div>
+
+  <script src="js/content-store.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      await CMS.init();
+      CMS.applyToPage();
+
+      // Render recommended products — one random from each category: 100K, 200K, 250K
+      var products = await CMS.getAllProducts();
+      var categories = ['100K', '200K', '250K'];
+      var taglines = {
+        '100K': 'Compact Power',
+        '200K': 'Extended Performance',
+        '250K': 'Ultimate Endurance'
+      };
+      var recommended = [];
+      categories.forEach(function(cat) {
+        var catProducts = products.filter(function(p) { return p.category === cat; });
+        if (catProducts.length > 0) {
+          var pick = catProducts[Math.floor(Math.random() * catProducts.length)];
+          pick._tagline = taglines[cat] || cat;
+          recommended.push(pick);
+        }
+      });
+
+      var container = document.getElementById('recommendedProducts');
+      if (container) {
+        container.innerHTML = '';
+        recommended.forEach(function(product) {
+          var imgHtml = '';
+          if (product.image && (product.image.match(/^https?:\/\//) || product.image.match(/^data:/) || product.image.match(/^\/uploads\//))) {
+            imgHtml = '<img src="' + product.image + '" alt="' + product.name + '" loading="lazy">';
+          } else {
+            var gradient = product.gradient || 'linear-gradient(135deg, #667eea, #764ba2)';
+            imgHtml = '<div class="rec-visual" style="background: ' + gradient + ';">' + (product.image || product.name.charAt(0)) + '</div>';
+          }
+          container.innerHTML +=
+            '<div class="recommended-card reveal" onclick="window.location.href=\'product-detail.html?id=' + product.id + '\'">' +
+            '<div class="rec-image">' + imgHtml + '</div>' +
+            '<div class="rec-tagline">' + product._tagline + '</div>' +
+            '<h3 class="rec-name">' + product.category + '</h3>' +
+            '<p class="rec-desc">' + (product.description || '') + '</p>' +
+            '<span class="rec-link">Learn More &rarr;</span>' +
+            '</div>';
+        });
+      }
+
+      // Render featured videos — Cover Flow Carousel
+      var featuredVideos = await CMS.getFeaturedVideos();
+      var fvTrack = document.getElementById('featuredVideosTrack');
+      var fvSection = document.querySelector('.fv-carousel-wrap');
+      if (fvTrack && featuredVideos.length > 0) {
+        var total = featuredVideos.length;
+        var current = 0;
+
+        // Build cards
+        fvTrack.innerHTML = '';
+        featuredVideos.forEach(function(v, idx) {
+          var videoId = extractYoutubeId(v.video_url);
+          var thumbHtml = '';
+          if (v.thumbnail) {
+            thumbHtml = '<img src="' + v.thumbnail + '" alt="' + v.title + '" loading="lazy">';
+          } else if (videoId) {
+            thumbHtml = '<img src="https://img.youtube.com/vi/' + videoId + '/hqdefault.jpg" alt="' + v.title + '" loading="lazy">';
+          }
+          var embedHtml = '';
+          if (videoId) {
+            embedHtml = '<div class="fv-player" data-video-id="' + videoId + '">' +
+              thumbHtml +
+              '<div class="fv-play-btn"><svg viewBox="0 0 24 24" width="56" height="56" fill="white"><circle cx="12" cy="12" r="10" fill="rgba(0,0,0,0.45)" stroke="white" stroke-width="1.2"/><polygon points="9,6 9,18 18,12" fill="white"/></svg></div>' +
+              '</div>';
+          } else if (v.video_url) {
+            embedHtml = '<div class="fv-player"><video src="' + v.video_url + '" poster="' + (v.thumbnail || '') + '" controls preload="metadata" style="width:100%;border-radius:18px;"></video></div>';
+          }
+          fvTrack.innerHTML +=
+            '<div class="fv-cf-card" data-index="' + idx + '">' +
+            embedHtml +
+            '<div class="fv-info"><h3 class="fv-title">' + v.title + '</h3>' +
+            (v.description ? '<p class="fv-desc">' + v.description + '</p>' : '') +
+            '</div></div>';
+        });
+
+        var cards = fvTrack.querySelectorAll('.fv-cf-card');
+
+        // Position helper — assign classes based on distance from center
+        function positionCards() {
+          cards.forEach(function(card, i) {
+            var dist = i - current;
+            // wrap-around for continuous feel
+            if (dist >  total / 2) dist -= total;
+            if (dist < -total / 2) dist += total;
+            var cls = 'fv-cf-card';
+            switch (dist) {
+              case  0: cls += ' pos-center'; break;
+              case  1: case -(total-1): cls += ' pos-right1'; break;
+              case -1: case  (total-1): cls += ' pos-left1';  break;
+              case  2: case -(total-2): cls += ' pos-right2'; break;
+              case -2: case  (total-2): cls += ' pos-left2';  break;
+              default: cls += ' pos-hidden';
+            }
+            card.className = cls;
+          });
+        }
+
+        // Navigate
+        function goTo(idx) {
+          current = ((idx % total) + total) % total;
+          positionCards();
+          updateDots();
+        }
+        function rotateCoverFlow(dir) {
+          goTo(current + dir);
+        }
+
+        // Dots
+        var dotsContainer = document.getElementById('fvCarouselDots');
+        dotsContainer.innerHTML = '';
+        for (var d = 0; d < total; d++) {
+          (function(di) {
+            var dot = document.createElement('span');
+            dot.className = 'dot' + (di === 0 ? ' active' : '');
+            dot.onclick = function() { goTo(di); };
+            dotsContainer.appendChild(dot);
+          })(d);
+        }
+        function updateDots() {
+          var dots = dotsContainer.querySelectorAll('.dot');
+          dots.forEach(function(dt, i) { dt.classList.toggle('active', i === current); });
+        }
+
+        // Buttons
+        var stageWrap = fvTrack.closest('.fv-carousel-wrap');
+        if (stageWrap) {
+          stageWrap.querySelector('.fv-prev').onclick = function() { rotateCoverFlow(-1); };
+          stageWrap.querySelector('.fv-next').onclick = function() { rotateCoverFlow(1); };
+        }
+
+        // Touch swipe
+        var touchStartX = 0;
+        var stage = fvTrack.parentElement;
+        stage.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; }, {passive: true});
+        stage.addEventListener('touchend', function(e) {
+          var diff = e.changedTouches[0].clientX - touchStartX;
+          if (Math.abs(diff) > 50) rotateCoverFlow(diff < 0 ? 1 : -1);
+        });
+
+        // Click handler — open popup for center card, rotate for side cards
+        var popupOverlay = document.getElementById('fvPopupOverlay');
+        var popupPlayer = document.getElementById('fvPopupPlayer');
+        var popupClose = document.getElementById('fvPopupClose');
+
+        function openVideoPopup(videoUrl, youtubeId) {
+          if (youtubeId) {
+            popupPlayer.innerHTML = '<iframe src="https://www.youtube.com/embed/' + youtubeId + '?autoplay=1&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+          } else if (videoUrl) {
+            popupPlayer.innerHTML = '<video src="' + videoUrl + '" controls autoplay style="width:100%;height:100%;"></video>';
+          }
+          popupOverlay.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeVideoPopup() {
+          popupOverlay.classList.add('hidden');
+          popupPlayer.innerHTML = '';
+          document.body.style.overflow = '';
+        }
+
+        popupClose.onclick = closeVideoPopup;
+        popupOverlay.onclick = function(e) {
+          if (e.target === popupOverlay) closeVideoPopup();
+        };
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && !popupOverlay.classList.contains('hidden')) closeVideoPopup();
+        });
+
+        fvTrack.addEventListener('click', function(e) {
+          var player = e.target.closest('.fv-player');
+          var card = e.target.closest('.fv-cf-card');
+          if (!card) return;
+          var idx = parseInt(card.dataset.index);
+          if (idx !== current) { goTo(idx); return; }
+          // Center card clicked — open popup
+          if (player) {
+            var vid = player.getAttribute('data-video-id');
+            var v = featuredVideos[current];
+            openVideoPopup(v.video_url, vid);
+          }
+        });
+
+        // Keyboard
+        document.addEventListener('keydown', function(e) {
+          if (!popupOverlay.classList.contains('hidden')) return; // popup open — handled above
+          if (e.key === 'ArrowLeft')  rotateCoverFlow(-1);
+          if (e.key === 'ArrowRight') rotateCoverFlow(1);
+        });
+
+        // Init
+        positionCards();
+
+      } else if (fvSection) {
+        fvSection.closest('section').style.display = 'none';
+      }
+
+      // Populate MAKE JOY HAPPEN collage photos from API
+      var collagePhotos = await CMS.getCollagePhotos();
+      var leftCol = document.querySelector('.mj-col-left');
+      var rightCol = document.querySelector('.mj-col-right');
+      if (leftCol && rightCol && collagePhotos.length > 0) {
+        leftCol.innerHTML = '';
+        rightCol.innerHTML = '';
+        collagePhotos.forEach(function(p, i) {
+          var target = (i % 2 === 0) ? leftCol : rightCol;
+          target.innerHTML += '<div class="mj-photo"><img src="' + p.image + '" alt="" loading="lazy"></div>';
+        });
+        // Duplicate for seamless loop
+        [leftCol, rightCol].forEach(function(col) {
+          col.innerHTML += col.innerHTML;
+        });
+      }
+
+      // Populate two-row bidirectional marquee with product images
+      (function populateMarquee() {
+        var topTrack = document.getElementById('makejoyMarqueeTop');
+        var bottomTrack = document.getElementById('makejoyMarqueeBottom');
+        if (!topTrack || !bottomTrack) return;
+
+        // Collect product image URLs
+        var images = [];
+        products.forEach(function(p) {
+          if (p.image && p.image.length > 0) {
+            images.push(p.image);
+          }
+          if (p.images && Array.isArray(p.images)) {
+            p.images.forEach(function(img) {
+              if (img && img.length > 0) images.push(img);
+            });
+          }
+        });
+        if (images.length === 0) return;
+
+        // De-duplicate
+        images = Array.from(new Set(images));
+
+        // Shuffle (Fisher-Yates)
+        for (var i = images.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = images[i]; images[i] = images[j]; images[j] = tmp;
+        }
+
+        // Ensure each row has enough items to fill the viewport (min 12)
+        while (images.length < 12) images = images.concat(images);
+
+        // Split into two rows interleaving for variety
+        var row1 = [];
+        var row2 = [];
+        images.forEach(function(url, idx) {
+          if (idx % 2 === 0) row1.push(url);
+          else row2.push(url);
+        });
+
+        function buildTrackHtml(arr) {
+          var html = '';
+          arr.forEach(function(url) {
+            html += '<div class="makejoy-marquee-item"><img src="' + url + '" alt="AL-WAHA product" loading="lazy"></div>';
+          });
+          return html;
+        }
+
+        // Build a single copy then duplicate it; the CSS animation translates by -50%
+        // to loop seamlessly back to the start.
+        topTrack.innerHTML = buildTrackHtml(row1) + buildTrackHtml(row1);
+        bottomTrack.innerHTML = buildTrackHtml(row2) + buildTrackHtml(row2);
+      })();
+
+      // Render latest news
+      var news = await CMS.getAllNews();
+      var newsContainer = document.getElementById('latestNews');
+      if (newsContainer) {
+        newsContainer.innerHTML = '';
+        news.slice(0, 3).forEach(function(item) {
+          var bannerHtml;
+          if (item.image) {
+            bannerHtml = '<div class="news-banner" style="background-image:url(\'' + item.image + '\');background-size:cover;background-position:center;">' +
+              '<span class="news-tag">' + (item.category || '') + '</span></div>';
+          } else {
+            bannerHtml = '<div class="news-banner" style="background: ' + (item.gradient || 'linear-gradient(135deg, #667eea, #764ba2)') + ';">' +
+              '<span>' + (item.icon || '') + '</span><span class="news-tag">' + (item.category || '') + '</span></div>';
+          }
+          newsContainer.innerHTML +=
+            '<div class="news-card reveal" onclick="window.location.href=\'news.html\'">' +
+            bannerHtml +
+            '<div class="news-info"><div class="news-date">' + formatDate(item.date) + '</div>' +
+            '<h3 class="news-title">' + item.title + '</h3><p class="news-excerpt">' + (item.excerpt || item.summary || '') + '</p></div></div>';
+        });
+      }
+
+      setTimeout(initScrollReveal, 100);
+    });
+
+    function extractYoutubeId(url) {
+      if (!url) return null;
+      var m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+  </script>
+</body>
+</html>

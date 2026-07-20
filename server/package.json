@@ -1,0 +1,16 @@
+{
+  "name": "al-waha-server",
+  "version": "1.0.0",
+  "description": "AL-WAHA CMS Backend",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "init-db": "node -e \"require('./db').query(require('fs').readFileSync('schema.sql','utf8')).then(()=>console.log('DB initialized')).catch(e=>console.error(e))\""
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "multer": "^2.2.0",
+    "mysql2": "^3.23.0"
+  }
+}

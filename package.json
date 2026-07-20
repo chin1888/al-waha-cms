@@ -1,0 +1,9 @@
+{
+  "name": "al-waha-cms",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "cd server && node index.js",
+    "postinstall": "cd server && npm install"
+  }
+}

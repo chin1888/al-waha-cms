@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News - AL-WAHA CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-icon-btn" id="menuToggle" style="display:none;" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <h1 data-i18n="news_title">新闻管理</h1>
+        </div>
+        <div class="topbar-right">
+          <button class="admin-btn admin-btn-primary" onclick="openNewsModal(null)" data-i18n="news_new">+ 新建文章</button>
+          <a href="../news.html" class="admin-btn admin-btn-sm" target="_blank" data-i18n="news_view_page">查看新闻页面 ↗</a>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="table-card">
+          <div class="table-header">
+            <h3 id="newsCount"></h3>
+            <div class="table-actions">
+              <div class="filter-pills" id="newsFilters">
+                <button class="filter-pill active" data-filter="all" data-i18n="news_filter_all">全部</button>
+                <button class="filter-pill" data-filter="Product Launch" data-i18n="news_filter_launch">产品发布</button>
+                <button class="filter-pill" data-filter="Company News" data-i18n="news_filter_company">公司新闻</button>
+                <button class="filter-pill" data-filter="Notice" data-i18n="news_filter_notice">公告</button>
+                <button class="filter-pill" data-filter="Awards" data-i18n="news_filter_awards">获奖</button>
+              </div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th data-i18n="news_table_article">文章</th>
+                  <th data-i18n="news_table_category">分类</th>
+                  <th data-i18n="news_table_date">日期</th>
+                  <th data-i18n="news_table_image">图片</th>
+                  <th data-i18n="news_table_actions">操作</th>
+                </tr>
+              </thead>
+              <tbody id="newsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-modal hidden" id="newsModal">
+        <div class="admin-modal-content" style="max-width:780px;">
+          <div class="admin-modal-header">
+            <h3 id="newsModalTitle"></h3>
+            <button class="admin-modal-close" onclick="closeNewsModal()">✕</button>
+          </div>
+          <form onsubmit="saveNews(event)">
+            <input type="hidden" id="newsId">
+            <div class="admin-form-group">
+              <label data-i18n="news_title_required">标题 *</label>
+              <input type="text" id="newsTitle" required placeholder="Article title...">
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-form-group">
+                <label data-i18n="news_category_required">分类 *</label>
+                <select id="newsCategory" required>
+                  <option value="Product Launch">Product Launch</option>
+                  <option value="Company News">Company News</option>
+                  <option value="Notice">Notice</option>
+                  <option value="Awards">Awards</option>
+                </select>
+              </div>
+              <div class="admin-form-group">
+                <label data-i18n="news_date_label">日期</label>
+                <input type="date" id="newsDate" required>
+              </div>
+            </div>
+            <div class="admin-form-row">
+              <div class="admin-form-group">
+                <label data-i18n="news_icon">图标 (emoji)</label>
+                <input type="text" id="newsIcon" placeholder="🚀">
+              </div>
+              <div class="admin-form-group">
+                <label data-i18n="news_gradient">渐变色 CSS</label>
+                <input type="text" id="newsGradient" placeholder="linear-gradient(135deg, #7c3aed, #ec4899)">
+              </div>
+            </div>
+            <div class="admin-form-group">
+              <label data-i18n="news_excerpt">摘要</label>
+              <textarea id="newsExcerpt" rows="3" placeholder="Short excerpt..."></textarea>
+            </div>
+            <div class="admin-form-group">
+              <label data-i18n="news_content">正文内容 (支持 HTML)</label>
+              <div class="news-editor-toolbar" id="newsEditorToolbar">
+                <button type="button" onclick="insertTag('b')" title="Bold"><b>B</b></button>
+                <button type="button" onclick="insertTag('i')" title="Italic"><i>I</i></button>
+                <button type="button" onclick="insertTag('h2')" title="Heading 2">H2</button>
+                <button type="button" onclick="insertTag('h3')" title="Heading 3">H3</button>
+                <button type="button" onclick="insertTag('p')" title="Paragraph">¶</button>
+                <button type="button" onclick="insertBlockquote()" title="Quote">❝</button>
+                <button type="button" onclick="insertList('ul')" title="Bullet List">• List</button>
+                <button type="button" onclick="insertList('ol')" title="Numbered List">1. List</button>
+                <button type="button" onclick="insertImage()" title="Upload Image">🖼️</button>
+                <button type="button" onclick="batchUploadImages()" title="Batch Upload Images">📸+</button>
+                <button type="button" onclick="insertLink()" title="Insert Link">🔗</button>
+              </div>
+              <textarea id="newsContent" rows="14" placeholder="Write article content here... Use HTML for formatting. &lt;b&gt;bold&lt;/b&gt; &lt;i&gt;italic&lt;/i&gt; &lt;h2&gt;heading&lt;/h2&gt; &lt;p&gt;paragraph&lt;/p&gt;"></textarea>
+              <button type="button" class="admin-btn admin-btn-sm" id="btnPreviewContent" onclick="toggleContentPreview()" style="margin-top:8px;">👁 预览</button>
+              <div id="newsContentPreview" style="display:none;margin-top:8px;padding:20px;background:#fff;border:1px solid var(--admin-border);border-radius:6px;min-height:100px;font-size:0.95rem;line-height:1.8;color:#333;overflow-y:auto;max-height:480px;"></div>
+            </div>
+            <div class="admin-form-group">
+              <label data-i18n="news_image">图片</label>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div id="newsImagePreview" style="width:100px;height:80px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:0.7rem;color:var(--admin-text-tertiary);">No image</div>
+                <input type="text" id="newsImage" placeholder="Image URL or base64..." style="flex:1;">
+                <button type="button" class="admin-btn admin-btn-sm" onclick="uploadMedia('image/*', function(b64){document.getElementById('newsImage').value=b64;updateNewsImgPreview();})">📷 Upload</button>
+              </div>
+            </div>
+            <div class="admin-modal-footer">
+              <button type="button" class="admin-btn" onclick="closeNewsModal()" data-i18n="news_cancel">取消</button>
+              <button type="submit" class="admin-btn admin-btn-primary" data-i18n="news_save">保存文章</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/content-store.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    renderSidebar('news');
+
+    var editingNewsId = null;
+    var currentFilter = 'all';
+
+    function updateNewsImgPreview() {
+      var val = document.getElementById('newsImage').value;
+      var preview = document.getElementById('newsImagePreview');
+      if (val) preview.innerHTML = '<img src="' + val + '" style="max-width:100%;max-height:100%;object-fit:cover;">';
+      else preview.innerHTML = 'No image';
+    }
+
+    function openNewsModal(article) {
+      var t = I18N.t;
+      editingNewsId = article ? article.id : null;
+      document.getElementById('newsModalTitle').textContent = article ? t('news_edit_title') : t('news_new_title');
+      document.getElementById('newsId').value = article ? article.id : '';
+      document.getElementById('newsTitle').value = article ? article.title : '';
+      document.getElementById('newsCategory').value = article ? article.category : 'Product Launch';
+      document.getElementById('newsDate').value = article ? article.date : new Date().toISOString().split('T')[0];
+      document.getElementById('newsIcon').value = article ? article.icon : '🚀';
+      document.getElementById('newsGradient').value = article ? article.gradient : 'linear-gradient(135deg, #7c3aed, #ec4899)';
+      document.getElementById('newsExcerpt').value = article ? article.excerpt : '';
+      document.getElementById('newsContent').value = article ? (article.content || '') : '';
+      document.getElementById('newsImage').value = article ? (article.image || '') : '';
+      updateNewsImgPreview();
+      document.getElementById('newsModal').classList.remove('hidden');
+    }
+
+    function closeNewsModal() {
+      document.getElementById('newsModal').classList.add('hidden');
+    }
+
+    async function saveNews(e) {
+      e.preventDefault();
+      var t = I18N.t;
+      var data = {
+        title: document.getElementById('newsTitle').value,
+        category: document.getElementById('newsCategory').value,
+        date: document.getElementById('newsDate').value,
+        icon: document.getElementById('newsIcon').value,
+        gradient: document.getElementById('newsGradient').value,
+        excerpt: document.getElementById('newsExcerpt').value,
+        content: document.getElementById('newsContent').value,
+        summary: document.getElementById('newsExcerpt').value,
+        image: document.getElementById('newsImage').value,
+        video: ''
+      };
+
+      if (editingNewsId) {
+        var ok = await CMS.updateNews(editingNewsId, data);
+        if (ok === false) { showAdminToast(t('news_save_failed'), 'error'); return; }
+        showAdminToast(t('news_updated'));
+      } else {
+        var result = await CMS.addNews(data);
+        if (!result) { showAdminToast(t('news_save_failed'), 'error'); return; }
+        showAdminToast(t('news_created'));
+      }
+      closeNewsModal();
+      await renderNews();
+    }
+
+    function deleteNews(id) {
+      confirmDialog(I18N.t('news_delete_confirm'), async function() {
+        await CMS.deleteNews(id);
+        showAdminToast(I18N.t('news_deleted'));
+        await renderNews();
+      });
+    }
+
+    async function editNewsById(id) {
+      var allNews = await CMS.getAllNews();
+      var article = allNews.find(function(n) { return n.id === id; });
+      if (article) openNewsModal(article);
+    }
+
+    async function renderNews() {
+      var t = I18N.t;
+      var news = await CMS.getAllNews();
+      if (currentFilter !== 'all') {
+        news = news.filter(function(n) { return n.category === currentFilter; });
+      }
+
+      document.getElementById('newsCount').textContent = t('news_count') + ' (' + news.length + ')';
+      document.getElementById('newsTableBody').innerHTML = news.map(function(item) {
+        return '<tr>' +
+          '<td><div><div style="font-weight:600;font-size:0.85rem;">' + item.title + '</div><div style="font-size:0.75rem;color:var(--admin-text-tertiary);">' + (item.excerpt || item.summary || '').substring(0, 60) + '...</div></div></td>' +
+          '<td><span class="status-badge active">' + item.category + '</span></td>' +
+          '<td>' + item.date + '</td>' +
+          '<td>' + (item.image ? '🖼️ ' + t('news_has_image') : '—') + '</td>' +
+          '<td><div class="action-btns">' +
+          '<button class="action-btn edit-news-btn" data-news-id="' + item.id + '">✏️</button>' +
+          '<button class="action-btn danger delete-news-btn" data-news-id="' + item.id + '">🗑</button>' +
+          '</div></td></tr>';
+      }).join('');
+
+      document.querySelectorAll('.edit-news-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { editNewsById(parseInt(this.dataset.newsId, 10)); });
+      });
+      document.querySelectorAll('.delete-news-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() { deleteNews(parseInt(this.dataset.newsId, 10)); });
+      });
+    }
+
+    document.getElementById('newsFilters').addEventListener('click', function(e) {
+      if (e.target.classList.contains('filter-pill')) {
+        document.querySelectorAll('#newsFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+        e.target.classList.add('active');
+        currentFilter = e.target.dataset.filter;
+        renderNews();
+      }
+    });
+
+    // ---- Rich Text Editor Toolbar ----
+    function insertTag(tag) {
+      var ta = document.getElementById('newsContent');
+      var s = ta.selectionStart, e = ta.selectionEnd;
+      var sel = ta.value.substring(s, e);
+      var prefix = '', suffix = '';
+      switch (tag) {
+        case 'b': prefix = '<b>'; suffix = '</b>'; break;
+        case 'i': prefix = '<i>'; suffix = '</i>'; break;
+        case 'h2': prefix = '<h2>'; suffix = '</h2>'; break;
+        case 'h3': prefix = '<h3>'; suffix = '</h3>'; break;
+        case 'p': prefix = '<p>'; suffix = '</p>'; break;
+      }
+      ta.value = ta.value.substring(0, s) + prefix + sel + suffix + ta.value.substring(e);
+      ta.focus();
+      ta.setSelectionRange(s + prefix.length, s + prefix.length + sel.length);
+    }
+
+    function insertBlockquote() {
+      var ta = document.getElementById('newsContent');
+      var s = ta.selectionStart, e = ta.selectionEnd;
+      var sel = ta.value.substring(s, e);
+      ta.value = ta.value.substring(0, s) + '<blockquote>' + (sel || 'Quote text') + '</blockquote>\n' + ta.value.substring(e);
+      ta.focus();
+    }
+
+    function insertList(type) {
+      var ta = document.getElementById('newsContent');
+      var s = ta.selectionStart;
+      var html = type === 'ul'
+        ? '<ul>\n  <li>Item 1</li>\n  <li>Item 2</li>\n  <li>Item 3</li>\n</ul>\n'
+        : '<ol>\n  <li>Item 1</li>\n  <li>Item 2</li>\n  <li>Item 3</li>\n</ol>\n';
+      ta.value = ta.value.substring(0, s) + html + ta.value.substring(s);
+      ta.focus();
+    }
+
+    function insertImage() {
+      uploadMedia('image/*', function(url) {
+        var ta = document.getElementById('newsContent');
+        var s = ta.selectionStart;
+        ta.value = ta.value.substring(0, s) + '<img src="' + url + '" alt="" style="max-width:100%;border-radius:12px;margin:16px 0;">\n' + ta.value.substring(s);
+        ta.focus();
+        showAdminToast('Image inserted!');
+      });
+    }
+
+    function batchUploadImages() {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.multiple = true;
+      input.onchange = async function(e) {
+        var files = Array.from(e.target.files);
+        if (!files.length) return;
+        showAdminToast('Uploading ' + files.length + ' image(s)...');
+        var ta = document.getElementById('newsContent');
+        var s = ta.selectionStart;
+        var html = '';
+        for (var i = 0; i < files.length; i++) {
+          var url = await CMS.uploadFile(files[i]);
+          if (url) {
+            html += '<img src="' + url + '" alt="" style="max-width:100%;border-radius:12px;margin:16px 0;">\n';
+          }
+        }
+        if (html) {
+          ta.value = ta.value.substring(0, s) + html + ta.value.substring(s);
+          ta.focus();
+          showAdminToast(files.length + ' image(s) inserted!');
+        }
+      };
+      input.click();
+    }
+
+    function insertLink() {
+      var url = prompt('Enter link URL:');
+      if (!url) return;
+      var ta = document.getElementById('newsContent');
+      var s = ta.selectionStart, e = ta.selectionEnd;
+      var text = ta.value.substring(s, e) || 'Click here';
+      ta.value = ta.value.substring(0, s) + '<a href="' + url + '">' + text + '</a>' + ta.value.substring(e);
+      ta.focus();
+    }
+
+    var previewMode = false;
+    function toggleContentPreview() {
+      var ta = document.getElementById('newsContent');
+      var preview = document.getElementById('newsContentPreview');
+      var btn = document.getElementById('btnPreviewContent');
+      previewMode = !previewMode;
+      if (previewMode) {
+        var val = ta.value;
+        var hasBlock = /<(\/)?\s*(p|h[1-6]|ul|ol|li|blockquote|div|section|table|figure)(\s|>)/i.test(val);
+        var displayHTML;
+        if (hasBlock) {
+          displayHTML = val;
+        } else {
+          displayHTML = val.split('\n').map(function(l){ l=l.trim();return l?'<p>'+l+'</p>':''; }).filter(Boolean).join('');
+        }
+        preview.innerHTML = '<style>' +
+          '.nd-preview{font-size:1.08rem;color:#374151;line-height:1.95;word-wrap:break-word;overflow-wrap:break-word}' +
+          '.nd-preview p{display:block;margin:0 0 24px 0;text-align:justify;color:#4b5563;line-height:1.9;font-size:1.05rem}' +
+          '.nd-preview img{display:block;width:100%;max-width:100%;height:auto;border-radius:12px;margin:28px auto;object-fit:contain}' +
+          '.nd-preview h2{display:block;font-size:1.55rem;color:#111827;margin:48px 0 20px 0;padding-bottom:14px;font-weight:800;line-height:1.3;border-bottom:2px solid #e5e7eb}' +
+          '.nd-preview h3{display:block;font-size:1.25rem;color:#111827;margin:40px 0 16px 0;font-weight:700;line-height:1.4}' +
+          '.nd-preview b,.nd-preview strong{color:#111827;font-weight:700}' +
+          '.nd-preview ul,.nd-preview ol{display:block;margin:0 0 24px 0;padding-left:28px;color:#4b5563;line-height:1.9}' +
+          '.nd-preview ul{list-style-type:disc}.nd-preview ol{list-style-type:decimal}' +
+          '.nd-preview li{display:list-item;margin-bottom:8px;line-height:1.8;padding-left:4px;color:#4b5563}' +
+          '.nd-preview li:last-child{margin-bottom:0}' +
+          '.nd-preview blockquote{display:block;border-left:4px solid #a855f7;padding:18px 24px;margin:32px 0;background:rgba(124,58,237,0.05);border-radius:0 10px 10px 0;color:#6b7280;font-style:italic;line-height:1.9}' +
+          '.nd-preview a{color:#ec4899;text-decoration:underline;text-underline-offset:3px}' +
+          '.nd-preview figure,.nd-preview picture{display:block;width:100%;max-width:100%;margin:28px auto}' +
+          '.nd-preview figure img,.nd-preview picture img{width:100%;margin:0}' +
+          '</style><div class="nd-preview">' + displayHTML + '</div>';
+        preview.style.display = 'block';
+        ta.style.display = 'none';
+        btn.textContent = '✏️ 编辑';
+      } else {
+        preview.style.display = 'none';
+        ta.style.display = '';
+        btn.textContent = '👁 预览';
+      }
+    }
+
+    window._onLangChange = function(lang) {
+      renderSidebar('news');
+      renderNews();
+      I18N.applyToDOM();
+    };
+
+    renderNews();
+  </script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Content - AL-WAHA CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-icon-btn" id="menuToggle" style="display:none;" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <h1 data-i18n="content_title">页面内容编辑器</h1>
+        </div>
+        <div class="topbar-right">
+          <a href="../index.html" class="admin-btn admin-btn-sm" target="_blank" data-i18n="sidebar_view_website">查看网站 ↗</a>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="cms-page-selector" id="pageSelector">
+          <button class="cms-page-tab" data-page="home" data-i18n="content_page_home">🏠 首页</button>
+          <button class="cms-page-tab" data-page="carousel" data-i18n="carousel_page">🎠 轮播图</button>
+          <button class="cms-page-tab" data-page="products" data-i18n="content_page_products">🏷️ 产品页面</button>
+          <button class="cms-page-tab" data-page="about" data-i18n="content_page_about">📖 关于我们</button>
+          <button class="cms-page-tab" data-page="news" data-i18n="content_page_news">📰 新闻页面</button>
+          <button class="cms-page-tab" data-page="contact" data-i18n="content_page_contact">📞 联系我们</button>
+          <button class="cms-page-tab" data-page="global" data-i18n="content_page_global">⚙️ 全局设置</button>
+          <button class="cms-page-tab" data-page="timeline" data-i18n="content_page_timeline">📅 大事记</button>
+        </div>
+
+        <div id="contentGroups"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/content-store.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    renderSidebar('content');
+
+    var currentPage = 'home';
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('page')) currentPage = urlParams.get('page');
+
+    function highlightActiveTab() {
+      document.querySelectorAll('.cms-page-tab').forEach(function(tab) {
+        if (tab.dataset.page === currentPage) tab.classList.add('active');
+        else tab.classList.remove('active');
+      });
+    }
+    highlightActiveTab();
+
+    document.getElementById('pageSelector').addEventListener('click', function(e) {
+      if (e.target.classList.contains('cms-page-tab')) {
+        document.querySelectorAll('.cms-page-tab').forEach(function(t) { t.classList.remove('active'); });
+        e.target.classList.add('active');
+        currentPage = e.target.dataset.page;
+        renderContent(currentPage);
+      }
+    });
+
+    function renderTextField(key, def, label) {
+      var t = I18N.t;
+      var val = CMS.get(key, def.default);
+      return '<div class="cms-field">' +
+        '<div class="cms-field-label"><div class="name">' + label + '</div><div class="type">' + def.type + '</div></div>' +
+        '<div class="cms-field-input">' +
+        (def.type === 'textarea'
+          ? '<textarea id="fld_' + key + '" onchange="saveToCms(\'' + key + '\', this)">' + (val || def.default) + '</textarea>'
+          : '<input type="text" id="fld_' + key + '" value="' + (val || def.default).replace(/"/g, '&quot;') + '" onchange="saveToCms(\'' + key + '\', this)">') +
+        '<button class="cms-save-btn" onclick="saveToCms(\'' + key + '\', document.getElementById(\'fld_' + key + '\'))">' + t('content_save') + '</button>' +
+        '</div></div>';
+    }
+
+    function renderImageField(key, def, label) {
+      var t = I18N.t;
+      var val = CMS.get(key, '');
+      return '<div class="cms-field">' +
+        '<div class="cms-field-label"><div class="name">' + label + '</div><div class="type">image</div></div>' +
+        '<div style="display:flex;gap:12px;align-items:flex-start;flex:1;">' +
+        '<div class="cms-media-preview" data-preview="' + key + '" style="min-width:120px;height:80px;">' +
+        (val ? '<img src="' + val + '" style="max-width:100%;max-height:100%;">' : '<span style="color:var(--admin-text-tertiary);font-size:0.8rem;">' + t('content_no_image') + '</span>') +
+        '</div>' +
+        '<div>' +
+        '<div class="cms-media-actions">' +
+        '<button class="cms-media-btn upload" onclick="uploadToCms(\'' + key + '\')">📷 ' + t('content_upload') + '</button>' +
+        (val ? '<button class="cms-media-btn remove" onclick="removeCmsMedia(\'' + key + '\')">✕ ' + t('content_remove') + '</button>' : '') +
+        '</div>' +
+        '<input type="text" id="fld_' + key + '" value="' + (val || '').replace(/"/g, '&quot;') + '" placeholder="' + t('content_or_paste_url') + '" style="margin-top:8px;width:280px;padding:6px 10px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text);font-size:0.8rem;" onchange="saveToCms(\'' + key + '\', this)">' +
+        '</div></div></div>';
+    }
+
+    function renderVideoField(key, def, label) {
+      var t = I18N.t;
+      var val = CMS.get(key, '');
+      return '<div class="cms-field">' +
+        '<div class="cms-field-label"><div class="name">' + label + '</div><div class="type">video</div></div>' +
+        '<div style="display:flex;gap:12px;align-items:flex-start;flex:1;">' +
+        '<div class="cms-media-preview" data-preview="' + key + '" style="min-width:120px;height:80px;">' +
+        (val ? '<video src="' + val + '" style="max-width:100%;max-height:100%;"></video>' : '<span style="color:var(--admin-text-tertiary);font-size:0.8rem;">' + t('content_no_video') + '</span>') +
+        '</div>' +
+        '<div>' +
+        '<div class="cms-media-actions">' +
+        '<button class="cms-media-btn upload" onclick="uploadVideoToCms(\'' + key + '\')">🎬 ' + t('content_upload') + '</button>' +
+        (val ? '<button class="cms-media-btn remove" onclick="removeCmsMedia(\'' + key + '\')">✕ ' + t('content_remove') + '</button>' : '') +
+        '</div>' +
+        '<input type="text" id="fld_' + key + '" value="' + (val || '').replace(/"/g, '&quot;') + '" placeholder="' + t('content_or_paste_url') + '" style="margin-top:8px;width:280px;padding:6px 10px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text);font-size:0.8rem;" onchange="saveToCms(\'' + key + '\', this)">' +
+        '</div></div></div>';
+    }
+
+    function renderContent(page) {
+      var t = I18N.t;
+      var container = document.getElementById('contentGroups');
+      var html = '';
+
+      if (page === 'timeline') {
+        html += '<div class="cms-group"><div class="cms-group-header"><h3>' + t('content_timeline_events') + '</h3></div><div class="cms-group-body">';
+        html += '<div id="timelineEditor"></div>';
+        html += '<button class="admin-btn admin-btn-primary admin-btn-sm" style="margin-top:12px;" onclick="addTimelineEvent()">' + t('content_add_event') + '</button>';
+        html += '</div></div>';
+        container.innerHTML = html;
+        renderTimelineEditor();
+        return;
+      }
+
+      if (page === 'carousel') {
+        html += '<div class="cms-group"><div class="cms-group-header"><h3>' + t('carousel_title') + '</h3></div><div class="cms-group-body">';
+        html += '<p style="color:var(--admin-text-secondary);margin-bottom:16px;font-size:0.9rem;">' + t('carousel_desc') + '</p>';
+        // Speed control
+        html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">';
+        html += '<label style="color:var(--admin-text-secondary);font-size:0.85rem;">' + t('carousel_speed') + '</label>';
+        html += '<input type="number" id="carouselSpeed" value="' + CMS.getCarouselSpeed() + '" style="width:100px;padding:6px 10px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text);font-size:0.85rem;" onchange="saveCarouselSpeed(this.value)">';
+        html += '<button class="admin-btn admin-btn-primary admin-btn-sm" onclick="saveCarouselSpeed(document.getElementById(\'carouselSpeed\').value)">' + t('content_save') + '</button>';
+        html += '</div>';
+        // Add button
+        html += '<button class="admin-btn admin-btn-primary admin-btn-sm" onclick="addCarouselSlide()">📷 ' + t('carousel_add') + '</button>';
+        html += '<div id="carouselEditor" style="margin-top:16px;"></div>';
+        html += '</div></div>';
+        container.innerHTML = html;
+        renderCarouselEditor();
+        return;
+      }
+
+      var schema = SCHEMA[page];
+      if (!schema) { container.innerHTML = '<p>' + t('content_no_fields') + '</p>'; return; }
+
+      var groups = {};
+      Object.keys(schema).forEach(function(key) {
+        var def = schema[key];
+        var group = def.group || 'General';
+        if (!groups[group]) groups[group] = [];
+        groups[group].push({ key: page + '.' + key, def: def, label: def.label });
+      });
+
+      Object.keys(groups).forEach(function(groupName) {
+        html += '<div class="cms-group">';
+        html += '<div class="cms-group-header"><h3>' + groupName + '</h3></div>';
+        html += '<div class="cms-group-body">';
+        groups[groupName].forEach(function(field) {
+          if (field.def.type === 'image') {
+            html += renderImageField(field.key, field.def, field.label);
+          } else if (field.def.type === 'video') {
+            html += renderVideoField(field.key, field.def, field.label);
+          } else {
+            html += renderTextField(field.key, field.def, field.label);
+          }
+        });
+        html += '</div></div>';
+
+        // Inject Collage Photo manager inside MAKE JOY HAPPEN group
+        if (groupName === 'MAKE JOY HAPPEN') {
+          html += '<div class="cms-group" id="collagePhotoManager"><div class="cms-group-header"><h3>Collage Photos</h3></div><div class="cms-group-body" id="collagePhotoList">Loading...</div></div>';
+        }
+      });
+
+      container.innerHTML = html;
+
+      // Render collage photos after DOM is ready
+      if (page === 'home') {
+        setTimeout(renderCollagePhotoManager, 50);
+      }
+    }
+
+    /* ── Carousel Editor ─────────────────────────── */
+    async function renderCarouselEditor() {
+      var t = I18N.t;
+      var slides = await CMS.getCarouselSlides();
+      var container = document.getElementById('carouselEditor');
+      if (!container) return;
+      if (slides.length === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:40px;background:var(--admin-bg);border-radius:var(--radius-lg);border:1px dashed var(--admin-border);">' +
+          '<div style="font-size:2rem;margin-bottom:8px;">🖼️</div>' +
+          '<div style="font-size:1rem;font-weight:600;color:var(--admin-text-secondary);margin-bottom:4px;">' + t('carousel_empty') + '</div>' +
+          '<div style="font-size:0.85rem;color:var(--admin-text-tertiary);">' + t('carousel_empty_desc') + '</div></div>';
+        return;
+      }
+      container.innerHTML = slides.map(function(slide, idx) {
+        return '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--admin-border);">' +
+          '<div style="flex-shrink:0;width:100px;height:70px;border-radius:8px;overflow:hidden;background:var(--admin-bg);border:1px solid var(--admin-border);">' +
+          '<img src="' + slide.image + '" style="width:100%;height:100%;object-fit:cover;">' +
+          '</div>' +
+          '<div style="flex:1;display:flex;flex-direction:column;gap:8px;">' +
+          '<div style="display:flex;gap:8px;">' +
+          '<input type="text" value="' + (slide.title || '').replace(/"/g, '&quot;') + '" placeholder="' + t('carousel_title_label') + '" style="flex:1;padding:6px 10px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text);font-size:0.85rem;" onchange="updateCarouselSlide(\'' + slide.id + '\', {title: this.value})">' +
+          '<input type="text" value="' + (slide.link || '').replace(/"/g, '&quot;') + '" placeholder="' + t('carousel_link_label') + '" style="flex:1;padding:6px 10px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text);font-size:0.85rem;" onchange="updateCarouselSlide(\'' + slide.id + '\', {link: this.value})">' +
+          '</div>' +
+          '<div style="display:flex;gap:8px;">' +
+          '<button class="admin-btn admin-btn-sm" style="padding:4px 8px;font-size:0.75rem;" onclick="moveCarouselSlide(\'' + slide.id + '\', -1)"' + (idx === 0 ? ' disabled' : '') + '>' + t('carousel_up') + '</button>' +
+          '<button class="admin-btn admin-btn-sm" style="padding:4px 8px;font-size:0.75rem;" onclick="moveCarouselSlide(\'' + slide.id + '\', 1)"' + (idx === slides.length - 1 ? ' disabled' : '') + '>' + t('carousel_down') + '</button>' +
+          '<button class="admin-btn admin-btn-sm" style="padding:4px 8px;font-size:0.75rem;color:var(--admin-danger);" onclick="deleteCarouselSlide(\'' + slide.id + '\')">' + t('carousel_delete') + '</button>' +
+          '</div>' +
+          '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    window.saveCarouselSpeed = async function(val) {
+      var n = parseInt(val, 10);
+      if (isNaN(n) || n < 1000) n = 5000;
+      await CMS.set('home._heroSlideSpeed', String(n));
+      showAdminToast(I18N.t('carousel_speed_saved'));
+    };
+
+    window.addCarouselSlide = function() {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var url = await CMS.uploadFile(file);
+        if (url) {
+          await CMS.addCarouselSlide(url, '', '');
+          await renderCarouselEditor();
+          showAdminToast(I18N.t('carousel_image_uploaded'));
+        } else {
+          showAdminToast(I18N.t('content_upload_failed') || 'Upload failed', 'error');
+        }
+      };
+      input.click();
+    };
+
+    window.updateCarouselSlide = async function(id, updates) {
+      await CMS.updateCarouselSlide(id, updates);
+      showAdminToast(I18N.t('carousel_updated'));
+    };
+
+    window.deleteCarouselSlide = async function(id) {
+      await CMS.deleteCarouselSlide(id);
+      await renderCarouselEditor();
+      showAdminToast(I18N.t('carousel_removed'));
+    };
+
+    window.moveCarouselSlide = async function(id, direction) {
+      await CMS.moveCarouselSlide(id, direction);
+      await renderCarouselEditor();
+      showAdminToast(I18N.t('carousel_updated'));
+    };
+
+    /* ── Timeline Editor ─────────────────────────── */
+    async function renderTimelineEditor() {
+      var timeline = await CMS.getTimeline();
+      var container = document.getElementById('timelineEditor');
+      container.innerHTML = timeline.map(function(item, idx) {
+        var imgPreview = item.image ? '<img src="'+item.image+'" style="width:48px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0;">' : '<div style="width:48px;height:48px;background:var(--admin-border);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--admin-muted);">IMG</div>';
+        return '<div style="display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--admin-border);">' +
+          imgPreview +
+          '<input type="text" value="' + item.year + '" placeholder="Year" style="width:70px;padding:6px 8px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text);font-size:0.85rem;" onchange="updateTimelineEvent(' + item.id + ', \'year\', this.value)">' +
+          '<input type="text" value="' + (item.title||'').replace(/"/g, '&quot;') + '" placeholder="Title" style="flex:1;padding:6px 8px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text);font-size:0.85rem;" onchange="updateTimelineEvent(' + item.id + ', \'title\', this.value)">' +
+          '<input type="text" value="' + (item.desc||'').replace(/"/g, '&quot;') + '" placeholder="Description" style="flex:2;padding:6px 8px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text);font-size:0.85rem;" onchange="updateTimelineEvent(' + item.id + ', \'desc\', this.value)">' +
+          '<button class="admin-btn admin-btn-sm" style="font-size:0.7rem;white-space:nowrap;" onclick="uploadTimelineImage(' + item.id + ')">📷 Upload</button>' +
+          '<button class="admin-btn admin-btn-sm" style="color:var(--admin-danger);" onclick="removeTimelineEvent(' + item.id + ')">✕</button>' +
+          '</div>';
+      }).join('');
+    }
+
+    window.updateTimelineEvent = async function(id, key, value) {
+      var update = {};
+      update[key] = value;
+      await CMS.updateTimeline(id, update);
+      showAdminToast(I18N.t('content_timeline_updated'));
+    };
+
+    window.addTimelineEvent = async function() {
+      await CMS.addTimeline({ year: '2026', title: 'New Event', desc: 'Description' });
+      await renderTimelineEditor();
+      showAdminToast(I18N.t('content_event_added'));
+    };
+
+    window.removeTimelineEvent = async function(id) {
+      await CMS.deleteTimeline(id);
+      await renderTimelineEditor();
+      showAdminToast(I18N.t('content_event_removed'));
+    };
+
+    window.uploadTimelineImage = async function(id) {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async function() {
+        var file = input.files[0];
+        if (!file) return;
+        var url = await CMS.uploadFile(file);
+        if (url) {
+          await CMS.updateTimeline(id, { image: url });
+          await renderTimelineEditor();
+          showAdminToast('Image updated');
+        }
+      };
+      input.click();
+    };
+
+    window._onLangChange = function(lang) {
+      renderSidebar('content');
+      highlightActiveTab();
+      renderContent(currentPage);
+      I18N.applyToDOM();
+    };
+
+    if (currentPage === 'timeline') {
+      setTimeout(function() { renderContent('timeline'); }, 50);
+    } else if (currentPage === 'carousel') {
+      setTimeout(function() { renderContent('carousel'); }, 50);
+    } else {
+      renderContent(currentPage);
+    }
+
+    /* ── Collage Photo Manager (inside MAKE JOY HAPPEN) ── */
+    async function renderCollagePhotoManager() {
+      var container = document.getElementById('collagePhotoList');
+      if (!container) return;
+
+      var photos = await CMS.getCollagePhotos();
+      var html = '';
+      if (photos.length === 0) {
+        html += '<div style="text-align:center;padding:24px;color:var(--admin-text-tertiary);font-size:0.9rem;">No collage photos yet.</div>';
+      } else {
+        html += '<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;">';
+        photos.forEach(function(p) {
+          html += '<div style="position:relative;width:100px;height:75px;border-radius:8px;overflow:hidden;border:1px solid var(--admin-border);">' +
+            '<img src="' + p.image + '" style="width:100%;height:100%;object-fit:cover;" alt="">' +
+            '<button onclick="deleteCollagePhoto(' + p.id + ')" style="position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,0.6);color:#fff;font-size:0.7rem;cursor:pointer;line-height:1;">✕</button>' +
+            '</div>';
+        });
+        html += '</div>';
+      }
+      html += '<button class="admin-btn admin-btn-primary admin-btn-sm" onclick="addCollagePhoto()">+ Add Photo</button>';
+      container.innerHTML = html;
+    }
+
+    async function addCollagePhoto() {
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = async function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var url = await CMS.uploadFile(file);
+        if (url) {
+          await CMS.addCollagePhoto({ image: url });
+          renderCollagePhotoManager();
+        }
+      };
+      input.click();
+    }
+
+    async function deleteCollagePhoto(id) {
+      if (!confirm('Delete this photo?')) return;
+      await CMS.deleteCollagePhoto(id);
+      renderCollagePhotoManager();
+    }
+
+    // Expose to global for onclick handlers
+    window.addCollagePhoto = addCollagePhoto;
+    window.deleteCollagePhoto = deleteCollagePhoto;
+  </script>
+</body>
+</html>

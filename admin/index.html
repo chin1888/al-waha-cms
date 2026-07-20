@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - AL-WAHA CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-icon-btn" id="menuToggle" style="display:none;" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <h1 data-i18n="dash_title">仪表盘</h1>
+        </div>
+        <div class="topbar-right">
+          <span style="font-size:0.85rem;color:var(--admin-text-secondary);" data-i18n="common_cms">AL-WAHA CMS</span>
+          <a href="../index.html" class="admin-btn admin-btn-sm" target="_blank" data-i18n="sidebar_view_website">查看网站 ↗</a>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="stat-grid" id="statGrid"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
+          <div class="chart-card">
+            <div class="chart-header"><h3 data-i18n="dash_quick_actions">快捷操作</h3></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:8px 0;">
+              <a href="content.html" class="admin-btn admin-btn-primary" style="justify-content:center;" data-i18n="dash_edit_content">📝 编辑页面内容</a>
+              <a href="products.html" class="admin-btn" style="justify-content:center;" data-i18n="dash_manage_products">🏷️ 管理产品</a>
+              <a href="news.html" class="admin-btn" style="justify-content:center;" data-i18n="dash_manage_news">📰 管理新闻</a>
+              <a href="media.html" class="admin-btn" style="justify-content:center;" data-i18n="dash_media_library">🖼️ 媒体库</a>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header"><h3 data-i18n="dash_content_summary">内容概览</h3></div>
+            <div style="display:flex;flex-direction:column;gap:8px;padding:8px 0;" id="contentSummary"></div>
+          </div>
+        </div>
+
+        <div style="text-align:right;">
+          <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="resetAllCms()" data-i18n="dash_reset_all">⚠ 重置所有内容</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/content-store.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    renderSidebar('dashboard');
+
+    async function renderDashboard() {
+      var t = I18N.t;
+      var products = await CMS.getAllProducts();
+      var news = await CMS.getAllNews();
+      var timeline = await CMS.getTimeline();
+      var totalFields = 0;
+      var editedFields = 0;
+      Object.keys(SCHEMA).forEach(function(page) {
+        if (page === '_products' || page === '_news' || page === '_timeline') return;
+        var fields = SCHEMA[page];
+        Object.keys(fields).forEach(function(key) {
+          totalFields++;
+          if (CMS.get(page + '.' + key) !== fields[key].default) editedFields++;
+        });
+      });
+
+      document.getElementById('statGrid').innerHTML =
+        '<div class="stat-card"><div class="stat-header"><div class="stat-icon" style="background:rgba(124,58,237,0.15);">🏷️</div></div><div class="stat-value">' + products.length + '</div><div class="stat-label">' + t('dash_products') + '</div></div>' +
+        '<div class="stat-card"><div class="stat-header"><div class="stat-icon" style="background:rgba(236,72,153,0.15);">📰</div></div><div class="stat-value">' + news.length + '</div><div class="stat-label">' + t('dash_news_articles') + '</div></div>' +
+        '<div class="stat-card"><div class="stat-header"><div class="stat-icon" style="background:rgba(6,182,212,0.15);">📅</div></div><div class="stat-value">' + timeline.length + '</div><div class="stat-label">' + t('dash_timeline') + '</div></div>' +
+        '<div class="stat-card"><div class="stat-header"><div class="stat-icon" style="background:rgba(16,185,129,0.15);">✏️</div></div><div class="stat-value">' + editedFields + '/' + totalFields + '</div><div class="stat-label">' + t('dash_fields_edited') + '</div></div>';
+
+      var pages = [
+        { name: t('dash_home_page'), url: 'content.html?page=home' },
+        { name: t('dash_products_page'), url: 'content.html?page=products' },
+        { name: t('dash_about_page'), url: 'content.html?page=about' },
+        { name: t('dash_news_page'), url: 'content.html?page=news' },
+        { name: t('dash_contact_page'), url: 'content.html?page=contact' },
+        { name: t('dash_global_settings'), url: 'content.html?page=global' }
+      ];
+      var fieldsText = ' ' + t('dash_fields');
+      document.getElementById('contentSummary').innerHTML = pages.map(function(p) {
+        var pageKey = p.url.split('=')[1];
+        var count = pageKey ? (SCHEMA[pageKey] ? Object.keys(SCHEMA[pageKey]).length : 0) : 0;
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--admin-border);"><a href="' + p.url + '" style="color:var(--admin-accent);font-size:0.85rem;">' + p.name + '</a><span style="font-size:0.8rem;color:var(--admin-text-tertiary);">' + count + fieldsText + '</span></div>';
+      }).join('');
+    }
+
+    renderDashboard();
+    window._onLangChange = function(lang) {
+      renderSidebar('dashboard');
+      renderDashboard();
+      I18N.applyToDOM();
+    };
+  </script>
+</body>
+</html>

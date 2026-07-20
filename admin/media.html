@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Media Library - AL-WAHA CMS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="topbar-icon-btn" id="menuToggle" style="display:none;" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+          <h1 data-i18n="media_title">媒体库</h1>
+        </div>
+        <div class="topbar-right">
+          <button class="admin-btn admin-btn-primary" onclick="uploadNewMedia()" data-i18n="media_upload">+ 上传媒体</button>
+        </div>
+      </header>
+
+      <div class="content-area">
+        <div class="stat-grid" id="mediaStats" style="margin-bottom:16px;"></div>
+
+        <div style="margin-bottom:16px;">
+          <div class="filter-pills" id="mediaFilters">
+            <button class="filter-pill active" data-filter="all" data-i18n="media_filter_all">全部</button>
+            <button class="filter-pill" data-filter="image" data-i18n="media_filter_images">图片</button>
+            <button class="filter-pill" data-filter="video" data-i18n="media_filter_videos">视频</button>
+          </div>
+        </div>
+
+        <div id="mediaGrid" class="media-grid"></div>
+        <div id="noMedia" style="display:none;text-align:center;padding:60px 0;">
+          <div style="font-size:3rem;margin-bottom:12px;">🖼️</div>
+          <p style="color:var(--admin-text-secondary);font-size:1.1rem;" data-i18n="media_empty_title">暂无媒体文件</p>
+          <p style="color:var(--admin-text-tertiary);font-size:0.85rem;margin-top:4px;" data-i18n="media_empty_desc">上传图片和视频，即可在网站各处使用。</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/content-store.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/admin.js"></script>
+  <script>
+    renderSidebar('media');
+
+    var currentFilter = 'all';
+
+    function uploadNewMedia() {
+      var t = I18N.t;
+      uploadMedia('image/*,video/*', function(base64, name, type) {
+        var id = 'media_' + Date.now();
+        var mediaType = type.startsWith('video/') ? 'video' : 'image';
+        CMS.addMedia(id, base64, name, mediaType);
+        var label = mediaType === 'video' ? t('toast_video') : t('toast_image');
+        showAdminToast(label + ' ' + t('media_uploaded'));
+        renderMedia();
+      });
+    }
+
+    function copyToClipboard(text) {
+      var t = I18N.t;
+      navigator.clipboard.writeText(text).then(function() {
+        showAdminToast(t('media_copy_done'));
+      }).catch(function() {
+        prompt(t('media_copy_fallback'), text);
+      });
+    }
+
+    function deleteMediaItem(id) {
+      var t = I18N.t;
+      confirmDialog(t('media_delete_confirm'), function() {
+        CMS.removeMedia(id);
+        showAdminToast(t('media_deleted'));
+        renderMedia();
+      });
+    }
+
+    function formatBytes(bytes) {
+      var base64 = bytes;
+      if (typeof base64 === 'string') base64 = base64.length;
+      if (base64 > 1024 * 1024) return (base64 / (1024 * 1024)).toFixed(1) + ' MB';
+      if (base64 > 1024) return (base64 / 1024).toFixed(1) + ' KB';
+      return base64 + ' B';
+    }
+
+    function renderMedia() {
+      var t = I18N.t;
+      var all = CMS.getAllMedia();
+      var items = Object.keys(all).map(function(k) { return { id: k, ...all[k] }; });
+
+      if (currentFilter !== 'all') {
+        items = items.filter(function(item) { return item.type === currentFilter; });
+      }
+
+      var imgCount = items.filter(function(i) { return i.type === 'image'; }).length;
+      var vidCount = items.filter(function(i) { return i.type === 'video'; }).length;
+      document.getElementById('mediaStats').innerHTML =
+        '<div class="stat-card"><div class="stat-header"><div class="stat-icon" style="background:rgba(124,58,237,0.15);">🖼️</div></div><div class="stat-value">' + imgCount + '</div><div class="stat-label">' + t('media_stats_images') + '</div></div>' +
+        '<div class="stat-card"><div class="stat-header"><div class="stat-icon" style="background:rgba(236,72,153,0.15);">🎬</div></div><div class="stat-value">' + vidCount + '</div><div class="stat-label">' + t('media_stats_videos') + '</div></div>' +
+        '<div class="stat-card"><div class="stat-header"><div class="stat-icon" style="background:rgba(6,182,212,0.15);">📁</div></div><div class="stat-value">' + items.length + '</div><div class="stat-label">' + t('media_stats_total') + '</div></div>';
+
+      var grid = document.getElementById('mediaGrid');
+      var noMedia = document.getElementById('noMedia');
+
+      if (items.length === 0) {
+        grid.style.display = 'none';
+        noMedia.style.display = 'block';
+        return;
+      }
+
+      grid.style.display = 'grid';
+      noMedia.style.display = 'none';
+
+      grid.innerHTML = items.map(function(item) {
+        var preview = item.type === 'video'
+          ? '<video src="' + item.base64 + '" style="max-width:100%;max-height:100%;"></video>'
+          : '<img src="' + item.base64 + '" style="max-width:100%;max-height:100%;object-fit:cover;">';
+        return '<div class="media-card">' +
+          '<div class="media-preview" style="cursor:pointer;" onclick="copyToClipboard(\'' + item.base64.substring(0, 80) + '...\')">' + preview + '</div>' +
+          '<div class="media-info">' +
+          '<div class="media-name" title="' + item.name + '">' + item.name + '</div>' +
+          '<div class="media-meta"><span>' + item.type.toUpperCase() + '</span><span>' + formatBytes(item.base64) + '</span></div>' +
+          '<div style="display:flex;gap:4px;margin-top:6px;">' +
+          '<button class="admin-btn admin-btn-sm" style="flex:1;font-size:0.72rem;padding:4px 6px;" onclick="copyToClipboard(\'' + item.base64.substring(0, 80) + '...\')">📋 ' + t('media_copy') + '</button>' +
+          '<button class="admin-btn admin-btn-sm" style="font-size:0.72rem;padding:4px 6px;color:var(--admin-danger);" onclick="deleteMediaItem(\'' + item.id + '\')">🗑</button>' +
+          '</div></div></div>';
+      }).join('');
+    }
+
+    document.getElementById('mediaFilters').addEventListener('click', function(e) {
+      if (e.target.classList.contains('filter-pill')) {
+        document.querySelectorAll('#mediaFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+        e.target.classList.add('active');
+        currentFilter = e.target.dataset.filter;
+        renderMedia();
+      }
+    });
+
+    window._onLangChange = function(lang) {
+      renderSidebar('media');
+      renderMedia();
+      I18N.applyToDOM();
+    };
+
+    renderMedia();
+  </script>
+</body>
+</html>

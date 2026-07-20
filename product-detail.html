@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Detail - AL-WAHA | Make Joy Happen</title>
+  <meta name="description" content="View detailed specifications, flavors, and features of AL-WAHA products.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="product-detail">
+
+  <div id="age-modal-container"></div>
+  <div id="navbar-container"></div>
+
+  <section style="padding-top: calc(var(--nav-height) + 32px); padding-bottom: var(--space-3xl);">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <div class="product-breadcrumb">
+        <a href="index.html">Home</a>
+        <span>/</span>
+        <a href="products.html">Products</a>
+        <span>/</span>
+        <span class="current" id="breadcrumbName">Product</span>
+      </div>
+
+      <!-- Product Detail Layout -->
+      <div class="product-detail" id="productDetail"></div>
+    </div>
+  </section>
+
+  <!-- Product Detail Content (full-width, bottom) -->
+  <section class="section" id="detailContentSection" style="display:none; padding-top:0; padding-bottom:var(--space-2xl);">
+    <div class="container">
+      <div class="detail-content-wrapper" id="detailContentArea"></div>
+    </div>
+  </section>
+
+  <!-- Related Products -->
+  <section class="section" style="background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
+    <div class="container">
+      <div class="related-heading">
+        <h2>You May Also <span class="text-gradient">Like</span></h2>
+        <p>Explore more products from our collection</p>
+      </div>
+      <div class="product-grid" id="relatedProducts"></div>
+    </div>
+  </section>
+
+  <div id="footer-container"></div>
+
+  <script src="js/content-store.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/components.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      await CMS.init();
+      CMS.applyToPage();
+
+      var urlParams = new URLSearchParams(window.location.search);
+      var productId = parseInt(urlParams.get('id')) || 1;
+      var products = await CMS.getAllProducts();
+      var product = products.find(function(p) { return p.id === productId; }) || products[0];
+
+      // Normalize product fields (API uses nested specs, description, images)
+      var specs = product.specs || {};
+      product.desc = product.description || product.desc || '';
+      product.puffs = specs.puffs || product.puffs || '';
+      product.nicotine = specs.nicotine || product.nicotine || '';
+      product.battery = specs.battery || product.battery || '';
+      product.capacity = specs.capacity || product.capacity || '';
+      product.resistance = specs.resistance || product.resistance || '';
+      product.charging = specs.charging || product.charging || '';
+      product.detailImages = product.images || product.detailImages || [];
+      product.gradient = product.gradient || '';
+      product.badge = product.badge || '';
+      product.detail_content = product.detail_content || '';
+
+      document.getElementById('breadcrumbName').textContent = product.name;
+      document.title = product.name + ' - AL-WAHA | Make Joy Happen';
+
+      var detail = document.getElementById('productDetail');
+      var detailImages = product.detailImages || [];
+
+      // --- Main image ---
+      var isImageUrl = product.image && (product.image.match(/^https?:\/\//) || product.image.match(/^data:/) || product.image.match(/^\/uploads\//));
+      var mainImageHtml;
+      if (isImageUrl) {
+        mainImageHtml = '<img src="' + product.image + '" alt="' + product.name + '">';
+      } else {
+        mainImageHtml = '<div class="product-visual-lg" style="background: ' + (product.gradient || 'linear-gradient(135deg, #667eea, #764ba2)') + ';">' + (product.image || product.name.charAt(0)) + '</div>';
+      }
+
+      // --- Thumbnails ---
+      var thumbsHtml = '';
+      var allThumbImages = [];
+      if (isImageUrl) allThumbImages.push(product.image);
+      allThumbImages = allThumbImages.concat(detailImages);
+
+      if (allThumbImages.length > 0) {
+        thumbsHtml = allThumbImages.map(function(img, i) {
+          return '<div class="product-thumbnail' + (i === 0 ? ' active' : '') + '" data-img="' + img + '"><img src="' + img + '" alt="View ' + (i + 1) + '" onerror="this.parentElement.style.display=\'none\'"></div>';
+        }).join('');
+      } else {
+        thumbsHtml = '<div class="product-thumbnail active" style="background: ' + (product.gradient || '#f0f0f5') + ';"><span style="font-size: 0.9rem; font-weight: 700; color: #fff;">' + (product.image || product.name.charAt(0)) + '</span></div>';
+      }
+
+      // Build detail HTML
+      detail.innerHTML =
+        '<div class="product-gallery">' +
+          '<div class="product-main-image" style="' + (product.gradient && !isImageUrl ? 'background: ' + product.gradient + ';' : '') + '">' +
+            mainImageHtml +
+            (product.badge ? '<div class="product-badge" style="position:absolute; top:16px; left:16px; font-size:0.8rem; padding:6px 14px;">' + product.badge + '</div>' : '') +
+          '</div>' +
+          '<div class="product-thumbnails">' + thumbsHtml + '</div>' +
+        '</div>' +
+
+        '<div class="product-info-detail">' +
+          '<div class="product-category-detail">' + product.category + '</div>' +
+          '<h1>' + product.name + '</h1>' +
+
+          // Specifications
+          '<div class="spec-grid">' +
+            '<div class="spec-item"><div class="spec-label">Puffs</div><div class="spec-value">' + product.puffs + '</div></div>' +
+            '<div class="spec-item"><div class="spec-label">Nicotine</div><div class="spec-value">' + product.nicotine + '</div></div>' +
+            '<div class="spec-item"><div class="spec-label">Battery</div><div class="spec-value">' + product.battery + '</div></div>' +
+            '<div class="spec-item"><div class="spec-label">Capacity</div><div class="spec-value">' + product.capacity + '</div></div>' +
+            '<div class="spec-item"><div class="spec-label">Resistance</div><div class="spec-value">' + product.resistance + '</div></div>' +
+            '<div class="spec-item"><div class="spec-label">Charging</div><div class="spec-value">' + product.charging + '</div></div>' +
+          '</div>' +
+
+          // Flavors
+          (product.flavors && product.flavors.length > 0 ? '<div class="flavor-section"><h3>Available Flavors (' + product.flavors.length + ')</h3><div class="flavor-options">' +
+            product.flavors.map(function(f, i) {
+              return '<div class="flavor-chip' + (i === 0 ? ' active' : '') + '" onclick="window._selectFlavor(this)">' + f + '</div>';
+            }).join('') +
+          '</div></div>' : '') +
+
+          // Features
+          (product.features && product.features.length > 0 ? '<div class="flavor-section"><h3>Key Features</h3><div class="feature-tags">' +
+            product.features.map(function(f) {
+              return '<div class="feature-tag-item"><span class="check-icon">&#10003;</span>' + f + '</div>';
+            }).join('') +
+          '</div></div>' : '') +
+
+          // Verification badge
+          '<div class="verify-badge">' +
+            '<span class="verify-icon">&#128274;</span>' +
+            '<div class="verify-text">' +
+              '<h4>Authenticity Verification</h4>' +
+              '<p>Every AL-WAHA product includes a unique verification code. Scan the QR code on the package to verify authenticity.</p>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      // --- Populate full-width detail content + video at bottom ---
+      var hasDetail = !!product.detail_content;
+      var hasVideo = !!product.video;
+      if (hasDetail || hasVideo) {
+        var dcSection = document.getElementById('detailContentSection');
+        var dcArea = document.getElementById('detailContentArea');
+        var html = '';
+        // Detail heading
+        html += '<div class="detail-heading"><h2 class="section-title">Product <span class="text-gradient">Details</span></h2><p class="section-subtitle">Everything you need to know about ' + product.name + '</p></div>';
+        // Detail content
+        if (hasDetail) {
+          html += '<div class="product-detail-content product-detail-content-full">' + product.detail_content + '</div>';
+        }
+        // Video
+        if (hasVideo) {
+          html += '<div class="detail-video-section">' +
+            '<h3 class="detail-video-title">Product <span class="text-gradient">Video</span></h3>' +
+            '<div class="detail-video-wrapper"><video src="' + product.video + '" controls style="width:100%;max-height:560px;border-radius:var(--radius-lg);"></video></div>' +
+            '</div>';
+        }
+        dcArea.innerHTML = html;
+        dcSection.style.display = '';
+      }
+
+      // --- Thumbnail click to swap main image ---
+      document.querySelectorAll('.product-thumbnail').forEach(function(thumb) {
+        thumb.addEventListener('click', function() {
+          document.querySelectorAll('.product-thumbnail').forEach(function(t) { t.classList.remove('active'); });
+          thumb.classList.add('active');
+          var imgSrc = thumb.dataset.img;
+          if (imgSrc) {
+            var mainImg = document.querySelector('.product-main-image');
+            var badgeEl = mainImg.querySelector('.product-badge');
+            var badgeHTML = badgeEl ? badgeEl.outerHTML : '';
+            var bgStyle = product.gradient ? 'background: ' + product.gradient + ';' : '';
+            mainImg.innerHTML = '<img src="' + imgSrc + '" alt="' + product.name + '" style="width:100%; height:100%; object-fit:contain; padding:24px;">' + badgeHTML;
+            mainImg.setAttribute('style', bgStyle);
+          }
+        });
+      });
+
+      // --- Flavor selection ---
+      window._selectFlavor = function(chip) {
+        document.querySelectorAll('.flavor-chip').forEach(function(c) { c.classList.remove('active'); });
+        chip.classList.add('active');
+      };
+
+      // --- Related Products ---
+      var relatedContainer = document.getElementById('relatedProducts');
+      var related = products.filter(function(p) { return p.id !== product.id; }).slice(0, 4);
+      if (related.length === 0) {
+        document.querySelector('.related-heading').style.display = 'none';
+      }
+      relatedContainer.innerHTML = related.map(function(p) {
+        return '<div class="product-card reveal" onclick="window.location.href=\'product-detail.html?id=' + p.id + '\'">' +
+          (p.badge ? '<div class="product-badge">' + p.badge + '</div>' : '') +
+          '<div class="product-image">' +
+            (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/))
+              ? '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy">'
+              : '<div class="product-visual" style="background: ' + (p.gradient || 'linear-gradient(135deg, #667eea, #764ba2)') + ';">' + (p.image || p.name.charAt(0)) + '</div>'
+            ) +
+          '</div>' +
+          '<div class="product-info">' +
+            '<div class="product-category">' + p.series + '</div>' +
+            '<h3 class="product-name">' + p.name + '</h3>' +
+            '<p class="product-desc">' + p.desc + '</p>' +
+            '<div class="product-meta">' +
+              '<span class="product-puffs">' + p.puffs + '</span>' +
+              '<span class="product-link">Learn More &rarr;</span>' +
+            '</div>' +
+          '</div></div>';
+      }).join('');
+
+      setTimeout(initScrollReveal, 100);
+    });
+  </script>
+</body>
+</html>
