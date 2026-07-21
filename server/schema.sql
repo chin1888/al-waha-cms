@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS products (
   series      VARCHAR(100) DEFAULT 'Gear',
   category    VARCHAR(100) DEFAULT 'Disposable',
   description TEXT,
+  detail_content TEXT,
   image       VARCHAR(500) DEFAULT '',        -- file path or URL
   images      JSON DEFAULT NULL,              -- array of extra image paths
   specs       JSON DEFAULT NULL,              -- {"puffs":"5000","nicotine":"5%","battery":"650mAh","coil":"Mesh","capacity":"12ml","charging":"Type-C"}
@@ -41,6 +42,10 @@ CREATE TABLE IF NOT EXISTS news (
   author      VARCHAR(100) DEFAULT 'AL-WAHA',
   published   TINYINT(1) DEFAULT 1,
   sort_order  INT DEFAULT 0,
+  date        DATE DEFAULT NULL,
+  icon        VARCHAR(10) DEFAULT '',
+  gradient    VARCHAR(100) DEFAULT '',
+  excerpt     TEXT,
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
@@ -71,6 +76,7 @@ CREATE TABLE IF NOT EXISTS timeline (
   year        VARCHAR(20) NOT NULL,
   title       VARCHAR(200) NOT NULL,
   description TEXT,
+  image       VARCHAR(500) DEFAULT '',
   sort_order  INT DEFAULT 0,
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
