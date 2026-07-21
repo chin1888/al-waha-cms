@@ -85,7 +85,7 @@
       var detailImages = product.detailImages || [];
 
       // --- Main image ---
-      var isImageUrl = product.image && (product.image.match(/^https?:\/\//) || product.image.match(/^data:/) || product.image.match(/^\/uploads\//));
+      var isImageUrl = product.image && (product.image.match(/^https?:\/\//) || product.image.match(/^data:/) || product.image.match(/^\//));
       var mainImageHtml;
       if (isImageUrl) {
         mainImageHtml = '<img src="' + product.image + '" alt="' + product.name + '">';
@@ -212,7 +212,7 @@
         return '<div class="product-card reveal" onclick="window.location.href=\'product-detail.html?id=' + p.id + '\'">' +
           (p.badge ? '<div class="product-badge">' + p.badge + '</div>' : '') +
           '<div class="product-image">' +
-            (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/))
+            (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/) || p.image.match(/^\//))
               ? '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy">'
               : '<div class="product-visual" style="background: ' + (p.gradient || 'linear-gradient(135deg, #667eea, #764ba2)') + ';">' + (p.image || p.name.charAt(0)) + '</div>'
             ) +
