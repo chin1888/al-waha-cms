@@ -2943,18 +2943,19 @@ ul, ol {
   margin: 0 auto;
 }
 
-/* Images row — Flex equal-width */
+/* Images row — Flex equal-width, nowrap */
 .am-images {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: center;
-  gap: 24px;
+  gap: 16px;
   margin: 0 auto 80px;
-  padding: 0 24px;
+  padding: 0 16px;
   align-items: flex-start;
 }
 .am-card {
-  flex: 0 0 360px;
+  flex: 1 1 0;
+  min-width: 0;
   text-align: center;
 }
 .am-card:nth-child(2) { margin-top: 48px; }
@@ -3008,18 +3009,12 @@ ul, ol {
   line-height: 1.7;
 }
 
-@media (max-width: 1100px) {
-  .am-card:nth-child(3n+1) { margin-top: 0; }
-  .am-card:nth-child(3n+2) { margin-top: 32px; }
-  .am-card:nth-child(3n+3) { margin-top: 16px; }
-}
-@media (max-width: 768px) {
-  .am-card:nth-child(even) { margin-top: 28px; }
-  .am-card:nth-child(odd) { margin-top: 0; }
-}
 @media (max-width: 500px) {
-  .am-card { flex: 0 0 100%; }
+  .am-images { gap: 8px; padding: 0 8px; }
   .am-card:nth-child(n) { margin-top: 0; }
+  .am-card:nth-child(2) { margin-top: 24px; }
+  .am-card:nth-child(3) { margin-top: 8px; }
+  .am-card:nth-child(4) { margin-top: 28px; }
 }
 
 /* 7. Growth / Ahead */
