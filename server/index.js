@@ -1,19 +1,27 @@
 /* =============================================
    AL-WAHA CMS — Express API Backend
-   MySQL + multer file upload
+   MySQL + Cloudinary image upload
    ============================================= */
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 const pool = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
 
-// Ensure upload directory exists
+// Cloudinary config
+cloudinary.config({
+  cloud_name: 'ijzagitk',
+  api_key: '955882554561765',
+  api_secret: 'EOsVjZ8uS0HGz_7IHUxGqrB_3aY'
+});
+
+// Ensure upload directory exists (for local dev fallback)
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 // Middleware
@@ -25,29 +33,32 @@ app.use('/uploads', express.static(UPLOAD_DIR));
 const FRONTEND_DIR = path.join(__dirname, '..');
 app.use(express.static(FRONTEND_DIR));
 
-// Multer config — store images on disk
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname) || '.jpg';
-    const name = 'img_' + Date.now() + '_' + Math.round(Math.random() * 1e5) + ext;
-    cb(null, name);
-  }
-});
-const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
+// Multer — memory storage for Cloudinary upload
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 // =============================================
-// FILE UPLOAD
+// FILE UPLOAD → Cloudinary
 // =============================================
-app.post('/api/upload', upload.single('file'), (req, res) => {
+app.post('/api/upload', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file' });
-  const url = '/uploads/' + req.file.filename;
-  // Save to media table
-  pool.execute(
-    'INSERT INTO media (filename, filepath, filetype, filesize) VALUES (?, ?, ?, ?)',
-    [req.file.originalname, url, req.file.mimetype.startsWith('video') ? 'video' : 'image', req.file.size]
-  ).catch(() => {});
-  res.json({ url, filename: req.file.originalname, size: req.file.size });
+  try {
+    const result = await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: 'al-waha', resource_type: 'auto' },
+        (err, result) => err ? reject(err) : resolve(result)
+      );
+      stream.end(req.file.buffer);
+    });
+    const url = result.secure_url;
+    pool.execute(
+      'INSERT INTO media (filename, filepath, filetype, filesize) VALUES (?, ?, ?, ?)',
+      [req.file.originalname, url, req.file.mimetype.startsWith('video') ? 'video' : 'image', req.file.size]
+    ).catch(() => {});
+    res.json({ url, filename: req.file.originalname, size: req.file.size });
+  } catch (e) {
+    console.error('Cloudinary upload failed:', e.message);
+    res.status(500).json({ error: 'Upload failed: ' + e.message });
+  }
 });
 
 // =============================================
