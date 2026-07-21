@@ -81,7 +81,6 @@
             ${linksHTML}
           </div>
           <div class="nav-actions">
-            <a href="admin/index.html" class="btn btn-secondary btn-sm">Admin</a>
           </div>
           <div class="nav-toggle">
             <span></span><span></span><span></span>
