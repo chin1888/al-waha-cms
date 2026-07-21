@@ -128,7 +128,7 @@
         return '<div class="product-card reveal" onclick="window.location.href=\'product-detail.html?id=' + product.id + '\'">' +
           (product.badge ? '<div class="product-badge">' + product.badge + '</div>' : '') +
           '<div class="product-image">' +
-            (product.image && (product.image.match(/^https?:\/\//) || product.image.match(/^data:/))
+            (product.image && (product.image.match(/^https?:\/\//) || product.image.match(/^data:/) || product.image.match(/^\//))
               ? '<img src="' + product.image + '" alt="' + product.name + '" loading="lazy">'
               : '<div class="product-visual" style="background: ' + (product.gradient || 'linear-gradient(135deg, #667eea, #764ba2)') + ';">' + (product.image || product.name.charAt(0)) + '</div>'
             ) +
