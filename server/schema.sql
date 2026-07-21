@@ -143,6 +143,14 @@ CREATE TABLE IF NOT EXISTS contact_submissions (
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ===== Collage Photos =====
+CREATE TABLE IF NOT EXISTS collage_photos (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  image       VARCHAR(500) NOT NULL,
+  sort_order  INT DEFAULT 0,
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
 -- ===== Insert default CMS settings =====
 INSERT INTO settings (`key`, `value`) VALUES
 ('global.siteName', 'AL-WAHA'),
