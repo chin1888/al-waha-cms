@@ -127,6 +127,7 @@
     document.addEventListener('DOMContentLoaded', async function() {
       await CMS.init();
       CMS.applyToPage();
+      if (window._initMegaMenu) window._initMegaMenu();
 
       // ---- Hero Visual Image ----
       var heroImg = CMS.get('about._heroImage');

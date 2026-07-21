@@ -1,19 +1,35 @@
 /* ================================
    AL-WAHA — MySQL Connection Pool
-   Supports local + Railway / cloud env
+   Set AIVEN=true env + MYSQL* vars for cloud MySQL
    ================================ */
 const mysql = require('mysql2/promise');
 
-// Railway provides: MYSQLHOST, MYSQLPORT, MYSQLUSER, MYSQLPASSWORD, MYSQLDATABASE
-const pool = mysql.createPool({
-  host: process.env.MYSQLHOST || process.env.MYSQL_HOST || '127.0.0.1',
-  port: process.env.MYSQLPORT || process.env.MYSQL_PORT || 3306,
-  user: process.env.MYSQLUSER || process.env.MYSQL_USER || 'root',
-  password: process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || 'alwaha123',
-  database: process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || 'alwaha',
+const useAiven = process.env.AIVEN === 'true';
+const missing = useAiven && !process.env.MYSQLPASSWORD;
+
+const pool = mysql.createPool(
+  useAiven ? {
+    host: process.env.MYSQLHOST || 'mysql-3577acf-al-hawa.h.aivencloud.com',
+    port: parseInt(process.env.MYSQLPORT) || 19170,
+    user: process.env.MYSQLUSER || 'avnadmin',
+    password: process.env.MYSQLPASSWORD || (missing ? '' : ''),
+    database: process.env.MYSQLDATABASE || 'defaultdb',
+    ssl: { rejectUnauthorized: false }
+  } : {
+    host: '127.0.0.1',
+    port: 3306,
+    user: 'root',
+    password: 'alwaha123',
+    database: 'alwaha'
+  }
+);
+
+if (missing) console.error('ERROR: AIVEN=true but MYSQLPASSWORD not set!');
+
+pool.config = { ...pool.config,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: useAiven ? 5 : 10,
   charset: 'utf8mb4'
-});
+};
 
 module.exports = pool;

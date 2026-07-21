@@ -321,6 +321,7 @@
     document.addEventListener('DOMContentLoaded', async function() {
       await CMS.init();
       CMS.applyToPage();
+      if (window._initMegaMenu) window._initMegaMenu();
       setTimeout(initScrollReveal, 100);
     });
 

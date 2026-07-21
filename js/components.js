@@ -281,6 +281,9 @@
       }
     }
 
+    // Retry mega menu after CMS init completes
+    // The DOMContentLoaded callback in each page will call this
+    window._initMegaMenu = initMegaMenu;
     initMegaMenu();
     const modal = document.getElementById('ageModal');
     if (modal) {

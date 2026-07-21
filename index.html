@@ -114,6 +114,7 @@
     document.addEventListener('DOMContentLoaded', async function() {
       await CMS.init();
       CMS.applyToPage();
+      if (window._initMegaMenu) window._initMegaMenu();
 
       // Render recommended products — one random from each category: 100K, 200K, 250K
       var products = await CMS.getAllProducts();

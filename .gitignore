@@ -1,7 +1,5 @@
 node_modules/
 server/node_modules/
-server/uploads/*
-!server/uploads/.gitkeep
 dist/
 vercel-dist/
 *.zip
@@ -10,3 +8,5 @@ vercel-dist/
 .workbuddy/
 .DS_Store
 mysql/
+*.sql
+*.bat
