@@ -275,11 +275,11 @@
         var formData = new FormData();
         formData.append('file', file);
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'http://localhost:3001/api/upload', true);
+        xhr.open('POST', API_BASE + '/upload', true);
         xhr.onload = function() {
           if (xhr.status === 200) {
             var resp = JSON.parse(xhr.responseText);
-            var url = 'http://localhost:3001' + resp.url;
+            var url = resp.url.startsWith('http') ? resp.url : (API_BASE.replace('/api','') + resp.url);
             var textarea = document.getElementById('prodDetailContent');
             var imgMarkdown = '<img src="' + url + '" alt="' + (file.name || 'image') + '" style="max-width:100%;border-radius:8px;">';
             // Insert at cursor position
