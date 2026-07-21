@@ -1,12 +1,7 @@
 -- =============================================
 -- AL-WAHA CMS Database Schema (MySQL 8.0)
+-- Database name is set in db.js via connection config
 -- =============================================
-
-CREATE DATABASE IF NOT EXISTS alwaha
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
-USE alwaha;
 
 -- ===== CMS Settings (key-value, all page content) =====
 CREATE TABLE IF NOT EXISTS settings (
