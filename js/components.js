@@ -188,7 +188,7 @@
       if (!megaItem || !panel || !grid) return;
 
       try {
-        var res = await fetch('http://localhost:3001/api/products');
+        var res = await fetch(API_BASE + '/products');
         if (!res.ok) return;
         var products = await res.json();
 
