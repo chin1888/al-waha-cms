@@ -1,7 +1,11 @@
 /* ================================
    AL-WAHA CMS — API Client (MySQL backend)
    ================================ */
-const API_BASE = 'http://localhost:3001/api';
+var API_BASE = window.location.origin + '/api';
+// When running locally, override to dev server port
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+  API_BASE = 'http://localhost:3001/api';
+}
 
 const CMS = {
   _data: null,     // cached settings { key: value }
