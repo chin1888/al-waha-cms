@@ -97,6 +97,8 @@ const CMS = {
       });
       if (!res.ok) throw new Error('Upload failed');
       const data = await res.json();
+      // Cloudinary returns full URL, local returns relative path
+      if (data.url.startsWith('http')) return data.url;
       return API_BASE.replace('/api', '') + data.url;
     } catch (e) { console.error('CMS.uploadFile failed:', e); return null; }
   },
