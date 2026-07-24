@@ -80,25 +80,40 @@ app.post('/api/auth/login', async (req, res) => {
     res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
   } catch (e) {
     console.error('Login error:', e.message);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Server error', detail: e.message });
   }
-});
+}
+
+app.post('/api/auth/seed-admin', async (req, res) => {
+  try {
+    const { key } = req.body;
+    if (key !== 'alwaha-setup-2024') return res.status(403).json({ error: 'Invalid key' });
+    await seedAdminUser(true);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+}););
 
 app.get('/api/auth/verify', authRequired, (req, res) => {
   res.json({ ok: true, user: req.user });
 });
 
 // ===== Seed default admin user =====
-async function seedAdminUser() {
+async function seedAdminUser(force) {
   try {
-    const [rows] = await pool.query('SELECT COUNT(*) as cnt FROM users');
-    if (rows[0].cnt > 0) return; // already seeded
+    const [rows] = await pool.query('SELECT COUNT(*) as cnt FROM users WHERE username = ?', ['admin']);
+    if (!force && rows[0].cnt > 0) return;
 
     const hash = await bcrypt.hash('alwaha2024', 12);
-    await pool.query('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', ['admin', hash, 'admin']);
-    console.log('Default admin user seeded (admin / alwaha2024)');
+    if (rows[0].cnt > 0) {
+      await pool.query('UPDATE users SET password = ?, role = ? WHERE username = ?', [hash, 'admin', 'admin']);
+      console.log('Admin user password reset');
+    } else {
+      await pool.query('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', ['admin', hash, 'admin']);
+      console.log('Default admin user seeded (admin / alwaha2024)');
+    }
   } catch (e) {
-    console.error('Seed admin error (may already exist):', e.message);
+    console.error('Seed admin error:', e.message);
+    throw e;
   }
 }
 
