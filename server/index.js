@@ -68,8 +68,16 @@ app.post('/api/auth/login', async (req, res) => {
     // Auto-create users table + seed admin if missing
     try {
       await pool.query('SELECT 1 FROM users LIMIT 0');
+      // Check if username column exists, recreate if not
+      try {
+        await pool.query('SELECT username FROM users LIMIT 0');
+      } catch {
+        await pool.query('DROP TABLE IF EXISTS users');
+        throw new Error('recreate');
+      }
     } catch {
-      await pool.query(`CREATE TABLE IF NOT EXISTS users (
+      await pool.query('DROP TABLE IF EXISTS users');
+      await pool.query(`CREATE TABLE users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         username VARCHAR(50) NOT NULL UNIQUE,
         password VARCHAR(255) NOT NULL,
@@ -97,7 +105,7 @@ app.post('/api/auth/login', async (req, res) => {
     console.error('Login error:', e.message);
     res.status(500).json({ error: 'Server error', detail: e.message });
   }
-}
+});
 
 app.post('/api/auth/seed-admin', async (req, res) => {
   try {
@@ -106,7 +114,7 @@ app.post('/api/auth/seed-admin', async (req, res) => {
     await seedAdminUser(true);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
-}););
+});
 
 app.get('/api/auth/verify', authRequired, (req, res) => {
   res.json({ ok: true, user: req.user });
@@ -677,7 +685,7 @@ async function initDatabase() {
 }
 
 // ===== Start =====
-initDatabase().then(() => seedAdminUser()).then(() => {
+initDatabase().then(() => seedAdminUser().catch(e => console.error('Seed admin skipped:', e.message))).then(() => {
   app.listen(PORT, () => {
     console.log(`AL-WAHA CMS API running on http://localhost:${PORT}`);
     console.log(`Uploads served from ${UPLOAD_DIR}`);
