@@ -30,6 +30,12 @@
           <div class="table-header">
             <h3 id="productCount"></h3>
             <div class="table-actions">
+              <div class="filter-pills" id="categoryFilters">
+                <button class="filter-pill active" data-cat="all">全部</button>
+                <button class="filter-pill" data-cat="100K">100K</button>
+                <button class="filter-pill" data-cat="200K">200K</button>
+                <button class="filter-pill" data-cat="250K">250K</button>
+              </div>
               <input type="text" data-i18n-placeholder="prod_search" placeholder="搜索产品..." id="productSearch" style="padding:6px 12px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text);font-size:0.85rem;width:200px;">
             </div>
           </div>
@@ -388,17 +394,25 @@
       if (product) openProductModal(product);
     }
 
+    var currentCategory = 'all';
+
     async function renderProducts() {
       var t = I18N.t;
       var products = await CMS.getAllProducts();
       var search = (document.getElementById('productSearch').value || '').toLowerCase();
+      
+      // Category filter
+      if (currentCategory !== 'all') {
+        products = products.filter(function(p) { return p.category === currentCategory; });
+      }
+      // Search filter
       if (search) {
         products = products.filter(function(p) {
           return p.name.toLowerCase().indexOf(search) !== -1 || p.series.toLowerCase().indexOf(search) !== -1;
         });
       }
 
-      document.getElementById('productCount').textContent = t('prod_count') + ' (' + products.length + ')';
+      document.getElementById('productCount').textContent = t('prod_count') + ' (' + products.length + ')' + (currentCategory !== 'all' ? ' — ' + currentCategory : '');
       document.getElementById('productTableBody').innerHTML = products.map(function(p) {
         var miniImgHtml = (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/)))
           ? '<img src="' + p.image + '" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" alt="' + p.name + '">'
@@ -427,6 +441,16 @@
 
     document.getElementById('addProductBtn').addEventListener('click', function() { openProductModal(null); });
     document.getElementById('productSearch').addEventListener('input', renderProducts);
+
+    // Category filter pills
+    document.getElementById('categoryFilters').addEventListener('click', function(e) {
+      if (e.target.classList.contains('filter-pill')) {
+        document.querySelectorAll('#categoryFilters .filter-pill').forEach(function(b) { b.classList.remove('active'); });
+        e.target.classList.add('active');
+        currentCategory = e.target.dataset.cat;
+        renderProducts();
+      }
+    });
 
     window._onLangChange = function(lang) {
       renderSidebar('products');
