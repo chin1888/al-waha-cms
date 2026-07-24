@@ -126,11 +126,12 @@ function uploadMedia(accept, callback) {
   input.onchange = async function(e) {
     var file = e.target.files[0];
     if (!file) return;
+    showAdminToast('Uploading...');
     var url = await CMS.uploadFile(file);
     if (url) {
       callback(url, file.name, file.type);
     } else {
-      showAdminToast(I18N.t('toast_save_failed') || 'Upload failed', 'error');
+      showAdminToast(I18N.t('toast_save_failed') || 'Upload failed — please try again', 'error');
     }
   };
   input.click();

@@ -162,7 +162,7 @@ INSERT INTO settings (`key`, `value`) VALUES
 ('home._heroSubtitle', 'Premium vaping experience redefined. Explore our next-generation disposable vape devices.'),
 ('home._heroBtnText', 'Explore Products'),
 ('home._featuredTitle', 'Featured Products'),
-('about._heroTitle', 'About AL-WAHA'),
+('about._heroTitle', 'About<br>AL-WAHA'),
 ('about._heroSubtitle', 'Our story, mission, and the team behind the brand.'),
 ('about._missionTitle', 'Our Mission'),
 ('about._missionText', 'To provide adult smokers with premium, innovative alternatives through cutting-edge vape technology.'),

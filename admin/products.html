@@ -271,36 +271,56 @@
       input.onchange = function(e) {
         var file = e.target.files[0];
         if (!file) return;
-        // Upload via FormData to API
-        var formData = new FormData();
-        formData.append('file', file);
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', API_BASE + '/upload', true);
-        xhr.onload = function() {
-          if (xhr.status === 200) {
-            var resp = JSON.parse(xhr.responseText);
-            var url = resp.url.startsWith('http') ? resp.url : (API_BASE.replace('/api','') + resp.url);
-            var textarea = document.getElementById('prodDetailContent');
-            var imgMarkdown = '<img src="' + url + '" alt="' + (file.name || 'image') + '" style="max-width:100%;border-radius:8px;">';
-            // Insert at cursor position
-            var start = textarea.selectionStart;
-            var end = textarea.selectionEnd;
-            var before = textarea.value.substring(0, start);
-            var after = textarea.value.substring(end);
-            textarea.value = before + imgMarkdown + after;
-            textarea.focus();
-            textarea.setSelectionRange(start + imgMarkdown.length, start + imgMarkdown.length);
-            showAdminToast('Image inserted into detail content');
-          } else {
-            showAdminToast('Upload failed', 'error');
-          }
-        };
-        xhr.onerror = function() {
-          showAdminToast('Upload failed — check API server', 'error');
-        };
-        xhr.send(formData);
+        // Upload via FormData to API (with retry for Render cold start)
+        showAdminToast('Uploading image — this may take a moment on first request...');
+        doUploadFormData(file, 0);
       };
       input.click();
+    }
+
+    function doUploadFormData(file, attempt) {
+      var formData = new FormData();
+      formData.append('file', file);
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', API_BASE + '/upload', true);
+      xhr.timeout = 60000; // 60s timeout for Render cold start
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          var resp = JSON.parse(xhr.responseText);
+          var url = resp.url.startsWith('http') ? resp.url : (API_BASE.replace('/api','') + resp.url);
+          var textarea = document.getElementById('prodDetailContent');
+          var imgMarkdown = '<img src="' + url + '" alt="' + (file.name || 'image') + '" style="max-width:100%;border-radius:8px;">';
+          var start = textarea.selectionStart;
+          var end = textarea.selectionEnd;
+          var before = textarea.value.substring(0, start);
+          var after = textarea.value.substring(end);
+          textarea.value = before + imgMarkdown + after;
+          textarea.focus();
+          textarea.setSelectionRange(start + imgMarkdown.length, start + imgMarkdown.length);
+          showAdminToast('Image inserted into detail content');
+        } else {
+          showAdminToast('Upload failed: ' + xhr.status, 'error');
+        }
+      };
+      xhr.ontimeout = function() {
+        if (attempt < 2) {
+          console.warn('Upload timed out (cold start), retrying...');
+          setTimeout(function() { doUploadFormData(file, attempt + 1); }, 3000);
+          showAdminToast('Server waking up, retrying...');
+        } else {
+          showAdminToast('Upload timed out — please try again', 'error');
+        }
+      };
+      xhr.onerror = function() {
+        if (attempt < 2) {
+          console.warn('Upload failed (network), retrying...');
+          setTimeout(function() { doUploadFormData(file, attempt + 1); }, 3000);
+          showAdminToast('Connection issue, retrying...');
+        } else {
+          showAdminToast('Upload failed — check API server', 'error');
+        }
+      };
+      xhr.send(formData);
     }
 
     function closeProductModal() {

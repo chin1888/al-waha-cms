@@ -88,19 +88,39 @@ const CMS = {
 
   // ─── Upload file to server ────────────────
   async uploadFile(file, onProgress) {
-    const formData = new FormData();
-    formData.append('file', file);
+    // Helper: warm up + upload with retry for Render cold start
+    const doUpload = async (attempt) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for cold start
+      try {
+        const res = await fetch(API_BASE + '/upload', {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (!res.ok) throw new Error('Upload failed: ' + res.status);
+        const data = await res.json();
+        if (data.url.startsWith('http')) return data.url;
+        return API_BASE.replace('/api', '') + data.url;
+      } catch (e) {
+        clearTimeout(timeoutId);
+        if (attempt < 2 && (e.name === 'AbortError' || e.message.includes('fetch') || e.message.includes('NetworkError'))) {
+          console.warn('Upload attempt ' + (attempt + 1) + ' failed, retrying...');
+          await new Promise(r => setTimeout(r, 3000)); // wait 3s then retry
+          return doUpload(attempt + 1);
+        }
+        throw e;
+      }
+    };
     try {
-      const res = await fetch(API_BASE + '/upload', {
-        method: 'POST',
-        body: formData
-      });
-      if (!res.ok) throw new Error('Upload failed');
-      const data = await res.json();
-      // Cloudinary returns full URL, local returns relative path
-      if (data.url.startsWith('http')) return data.url;
-      return API_BASE.replace('/api', '') + data.url;
-    } catch (e) { console.error('CMS.uploadFile failed:', e); return null; }
+      return await doUpload(0);
+    } catch (e) {
+      console.error('CMS.uploadFile failed:', e.message);
+      return null;
+    }
   },
 
   // ─── FileToBase64 (legacy, for compatibility) ──
