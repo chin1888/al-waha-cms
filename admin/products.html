@@ -55,6 +55,7 @@
               <tbody id="productTableBody"></tbody>
             </table>
           </div>
+          <div class="table-footer" id="productPagination"></div>
         </div>
       </div>
 
@@ -395,6 +396,8 @@
     }
 
     var currentCategory = 'all';
+    var currentPage = 1;
+    var pageSize = 10;
 
     async function renderProducts() {
       var t = I18N.t;
@@ -412,8 +415,15 @@
         });
       }
 
-      document.getElementById('productCount').textContent = t('prod_count') + ' (' + products.length + ')' + (currentCategory !== 'all' ? ' — ' + currentCategory : '');
-      document.getElementById('productTableBody').innerHTML = products.map(function(p) {
+      var totalPages = Math.ceil(products.length / pageSize) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+      var start = (currentPage - 1) * pageSize;
+      var pageProducts = products.slice(start, start + pageSize);
+
+      var catLabel = currentCategory !== 'all' ? ' — ' + currentCategory : '';
+      var pageLabel = totalPages > 1 ? (' | 第 ' + currentPage + '/' + totalPages + ' 页') : '';
+      document.getElementById('productCount').textContent = t('prod_count') + ' (' + products.length + ')' + catLabel + pageLabel;
+      document.getElementById('productTableBody').innerHTML = pageProducts.map(function(p) {
         var miniImgHtml = (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/)))
           ? '<img src="' + p.image + '" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" alt="' + p.name + '">'
           : (p.image || p.name.charAt(0));
@@ -430,6 +440,9 @@
           '</div></td></tr>';
       }).join('');
 
+      // Render pagination
+      renderPagination(totalPages);
+
       // Bind click events to edit/delete buttons (avoids JSON in onclick)
       document.querySelectorAll('.edit-product-btn').forEach(function(btn) {
         btn.addEventListener('click', function() { editProductById(parseInt(this.dataset.productId, 10)); });
@@ -440,7 +453,7 @@
     }
 
     document.getElementById('addProductBtn').addEventListener('click', function() { openProductModal(null); });
-    document.getElementById('productSearch').addEventListener('input', renderProducts);
+    document.getElementById('productSearch').addEventListener('input', function() { currentPage = 1; renderProducts(); });
 
     // Category filter pills
     document.getElementById('categoryFilters').addEventListener('click', function(e) {
@@ -448,9 +461,37 @@
         document.querySelectorAll('#categoryFilters .filter-pill').forEach(function(b) { b.classList.remove('active'); });
         e.target.classList.add('active');
         currentCategory = e.target.dataset.cat;
+        currentPage = 1;
         renderProducts();
       }
     });
+
+    function renderPagination(totalPages) {
+      var container = document.getElementById('productPagination');
+      if (totalPages <= 1) { container.innerHTML = ''; return; }
+
+      var html = '<div class="pagination">';
+      html += '<button class="page-btn" ' + (currentPage === 1 ? 'disabled' : '') + ' onclick="goToPage(' + (currentPage - 1) + ')">‹ 上一页</button>';
+
+      for (var i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+          html += '<button class="page-btn' + (i === currentPage ? ' active' : '') + '" onclick="goToPage(' + i + ')">' + i + '</button>';
+        } else if (i === 2 || i === totalPages - 1) {
+          html += '<span class="page-dots">…</span>';
+        }
+      }
+
+      html += '<button class="page-btn" ' + (currentPage === totalPages ? 'disabled' : '') + ' onclick="goToPage(' + (currentPage + 1) + ')">下一页 ›</button>';
+      html += '<span class="page-info">共 ' + totalPages + ' 页</span>';
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    window.goToPage = function(page) {
+      currentPage = page;
+      renderProducts();
+      document.getElementById('productTableBody').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
 
     window._onLangChange = function(lang) {
       renderSidebar('products');

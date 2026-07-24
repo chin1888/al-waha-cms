@@ -692,6 +692,53 @@ table tbody tr:hover {
 .status-badge.inactive { background: rgba(239, 68, 68, 0.15); color: var(--admin-danger); }
 .status-badge.inactive::before { background: var(--admin-danger); }
 
+/* Pagination */
+.table-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--admin-border);
+  display: flex;
+  justify-content: center;
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.page-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-card);
+  color: var(--admin-text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.page-btn:hover:not(:disabled) {
+  border-color: var(--admin-accent);
+  color: var(--admin-text);
+}
+.page-btn.active {
+  background: var(--admin-accent);
+  border-color: var(--admin-accent);
+  color: #fff;
+  font-weight: 600;
+}
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.page-dots {
+  padding: 0 4px;
+  color: var(--admin-text-secondary);
+  font-size: 0.8rem;
+}
+.page-info {
+  margin-left: 12px;
+  font-size: 0.8rem;
+  color: var(--admin-text-secondary);
+}
+
 .role-badge {
   display: inline-flex;
   padding: 3px 10px;
