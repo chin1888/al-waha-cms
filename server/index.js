@@ -65,6 +65,21 @@ app.post('/api/auth/login', async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
 
+    // Auto-create users table + seed admin if missing
+    try {
+      await pool.query('SELECT 1 FROM users LIMIT 0');
+    } catch {
+      await pool.query(`CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(50) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        role VARCHAR(20) DEFAULT 'admin',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB`);
+      const hash = await bcrypt.hash('alwaha2024', 12);
+      await pool.query('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', ['admin', hash, 'admin']);
+    }
+
     const [rows] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
     if (!rows.length) return res.status(401).json({ error: 'Invalid credentials' });
 
