@@ -1,17 +1,20 @@
 /* =============================================
    AL-WAHA CMS — Express API Backend
-   MySQL + Cloudinary image upload
+   MySQL + Cloudinary image upload + JWT Auth
    ============================================= */
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const cloudinary = require('cloudinary').v2;
 const pool = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const JWT_SECRET = process.env.JWT_SECRET || 'alwaha-cms-secret-2024';
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
 
 // Cloudinary config
@@ -37,9 +40,72 @@ app.use(express.static(FRONTEND_DIR));
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 // =============================================
+// JWT AUTH MIDDLEWARE
+// =============================================
+function authRequired(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+  const token = header.slice(7);
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = payload;
+    next();
+  } catch {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
+}
+
+// =============================================
+// AUTH ROUTES
+// =============================================
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
+
+    const [rows] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+    if (!rows.length) return res.status(401).json({ error: 'Invalid credentials' });
+
+    const user = rows[0];
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+
+    const token = jwt.sign(
+      { id: user.id, username: user.username, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+    res.json({ token, user: { id: user.id, username: user.username, role: user.role } });
+  } catch (e) {
+    console.error('Login error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.get('/api/auth/verify', authRequired, (req, res) => {
+  res.json({ ok: true, user: req.user });
+});
+
+// ===== Seed default admin user =====
+async function seedAdminUser() {
+  try {
+    const [rows] = await pool.query('SELECT COUNT(*) as cnt FROM users');
+    if (rows[0].cnt > 0) return; // already seeded
+
+    const hash = await bcrypt.hash('alwaha2024', 12);
+    await pool.query('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', ['admin', hash, 'admin']);
+    console.log('Default admin user seeded (admin / alwaha2024)');
+  } catch (e) {
+    console.error('Seed admin error (may already exist):', e.message);
+  }
+}
+
+// =============================================
 // FILE UPLOAD → Cloudinary
 // =============================================
-app.post('/api/upload', upload.single('file'), async (req, res) => {
+app.post('/api/upload', authRequired, upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file' });
   try {
     const result = await new Promise((resolve, reject) => {
@@ -80,7 +146,7 @@ app.get('/api/settings/:key', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/settings/:key', async (req, res) => {
+app.put('/api/settings/:key', authRequired, async (req, res) => {
   try {
     await pool.execute(
       'INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)',
@@ -91,7 +157,7 @@ app.put('/api/settings/:key', async (req, res) => {
 });
 
 // Bulk save settings
-app.put('/api/settings', async (req, res) => {
+app.put('/api/settings', authRequired, async (req, res) => {
   try {
     const entries = Object.entries(req.body);
     for (const [key, value] of entries) {
@@ -134,7 +200,7 @@ app.get('/api/products/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/products', async (req, res) => {
+app.post('/api/products', authRequired, async (req, res) => {
   try {
     const { name, series, category, description, detail_content, image, images, specs, flavors, features, video, verified, sort_order } = req.body;
     const [result] = await pool.execute(
@@ -148,7 +214,7 @@ app.post('/api/products', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/products/:id', async (req, res) => {
+app.put('/api/products/:id', authRequired, async (req, res) => {
   try {
     const { name, series, category, description, detail_content, image, images, specs, flavors, features, video, verified, sort_order } = req.body;
     await pool.execute(
@@ -161,7 +227,7 @@ app.put('/api/products/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/products/:id', async (req, res) => {
+app.delete('/api/products/:id', authRequired, async (req, res) => {
   try {
     await pool.execute('DELETE FROM products WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
@@ -186,7 +252,7 @@ app.get('/api/news/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/news', async (req, res) => {
+app.post('/api/news', authRequired, async (req, res) => {
   try {
     const { title, category, summary, content, image, video, author, published, sort_order, date, icon, gradient, excerpt } = req.body;
     const [result] = await pool.execute(
@@ -198,7 +264,7 @@ app.post('/api/news', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/news/:id', async (req, res) => {
+app.put('/api/news/:id', authRequired, async (req, res) => {
   try {
     const { title, category, summary, content, image, video, author, published, sort_order, date, icon, gradient, excerpt } = req.body;
     await pool.execute(
@@ -209,7 +275,7 @@ app.put('/api/news/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/news/:id', async (req, res) => {
+app.delete('/api/news/:id', authRequired, async (req, res) => {
   try {
     await pool.execute('DELETE FROM news WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
@@ -240,14 +306,14 @@ app.get('/api/contact', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/contact/:id/read', async (req, res) => {
+app.put('/api/contact/:id/read', authRequired, async (req, res) => {
   try {
     await pool.execute('UPDATE contact_submissions SET is_read = 1 WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/contact/:id', async (req, res) => {
+app.delete('/api/contact/:id', authRequired, async (req, res) => {
   try {
     await pool.execute('DELETE FROM contact_submissions WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
@@ -264,7 +330,7 @@ app.get('/api/carousel', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/carousel', async (req, res) => {
+app.post('/api/carousel', authRequired, async (req, res) => {
   try {
     const { image, title, link, sort_order } = req.body;
     const [result] = await pool.execute(
@@ -275,7 +341,7 @@ app.post('/api/carousel', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/carousel/:id', async (req, res) => {
+app.put('/api/carousel/:id', authRequired, async (req, res) => {
   try {
     const { image, title, link, sort_order } = req.body;
     await pool.execute(
@@ -286,7 +352,7 @@ app.put('/api/carousel/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/carousel/:id', async (req, res) => {
+app.delete('/api/carousel/:id', authRequired, async (req, res) => {
   try {
     await pool.execute('DELETE FROM carousel WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
@@ -303,7 +369,7 @@ app.get('/api/featured-videos', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/featured-videos', async (req, res) => {
+app.post('/api/featured-videos', authRequired, async (req, res) => {
   try {
     const { title, description, video_url, thumbnail, sort_order } = req.body;
     const [result] = await pool.execute(
@@ -314,7 +380,7 @@ app.post('/api/featured-videos', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/featured-videos/:id', async (req, res) => {
+app.put('/api/featured-videos/:id', authRequired, async (req, res) => {
   try {
     const { title, description, video_url, thumbnail, sort_order } = req.body;
     await pool.execute(
@@ -325,7 +391,7 @@ app.put('/api/featured-videos/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/featured-videos/:id', async (req, res) => {
+app.delete('/api/featured-videos/:id', authRequired, async (req, res) => {
   try {
     await pool.execute('DELETE FROM featured_videos WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
@@ -342,7 +408,7 @@ app.get('/api/collage-photos', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/collage-photos', async (req, res) => {
+app.post('/api/collage-photos', authRequired, async (req, res) => {
   try {
     const { image, sort_order } = req.body;
     const [result] = await pool.execute(
@@ -353,14 +419,14 @@ app.post('/api/collage-photos', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/collage-photos/:id', async (req, res) => {
+app.delete('/api/collage-photos/:id', authRequired, async (req, res) => {
   try {
     await pool.execute('DELETE FROM collage_photos WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/collage-photos/reorder', async (req, res) => {
+app.put('/api/collage-photos/reorder', authRequired, async (req, res) => {
   try {
     const { ids } = req.body;
     for (let i = 0; i < ids.length; i++) {
@@ -385,7 +451,7 @@ app.get('/api/media', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/media/:id', async (req, res) => {
+app.delete('/api/media/:id', authRequired, async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT filepath FROM media WHERE id = ?', [req.params.id]);
     if (rows[0]) {
@@ -407,7 +473,7 @@ app.get('/api/timeline', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.post('/api/timeline', async (req, res) => {
+app.post('/api/timeline', authRequired, async (req, res) => {
   try {
     const { year, title, description, desc, image, sort_order } = req.body;
     const [result] = await pool.execute(
@@ -418,7 +484,7 @@ app.post('/api/timeline', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/timeline/:id', async (req, res) => {
+app.put('/api/timeline/:id', authRequired, async (req, res) => {
   try {
     const allowed = ['year', 'title', 'description', 'desc', 'image', 'sort_order'];
     const sets = [];
@@ -441,7 +507,7 @@ app.put('/api/timeline/:id', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/timeline/:id', async (req, res) => {
+app.delete('/api/timeline/:id', authRequired, async (req, res) => {
   try {
     await pool.execute('DELETE FROM timeline WHERE id = ?', [req.params.id]);
     res.json({ ok: true });
@@ -458,7 +524,7 @@ app.get('/api/orders', async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/orders/:id', async (req, res) => {
+app.put('/api/orders/:id', authRequired, async (req, res) => {
   try {
     const { status } = req.body;
     await pool.execute('UPDATE orders SET status = ? WHERE id = ?', [status, req.params.id]);
@@ -495,7 +561,7 @@ app.get('/api/stats', async (req, res) => {
 // =============================================
 // SEED DATA — Insert demo data if tables are empty
 // =============================================
-app.post('/api/seed', async (req, res) => {
+app.post('/api/seed', authRequired, async (req, res) => {
   try {
     const results = [];
 
@@ -581,7 +647,7 @@ async function initDatabase() {
 }
 
 // ===== Start =====
-initDatabase().then(() => {
+initDatabase().then(() => seedAdminUser()).then(() => {
   app.listen(PORT, () => {
     console.log(`AL-WAHA CMS API running on http://localhost:${PORT}`);
     console.log(`Uploads served from ${UPLOAD_DIR}`);
