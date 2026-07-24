@@ -71,6 +71,7 @@
             </thead>
             <tbody id="msgTableBody"></tbody>
           </table>
+          <div class="table-footer" id="msgPagination"></div>
         </div>
       </div>
 
@@ -93,12 +94,21 @@
   <script>
     renderSidebar('contact-msgs');
 
+    var msgCurrentPage = 1;
+    var msgPageSize = 10;
+
     async function loadMessages() {
       var msgs = await CMS.getContactSubmissions();
-      document.getElementById('msgCount').textContent = msgs.length + ' messages';
+      var totalPages = Math.ceil(msgs.length / msgPageSize) || 1;
+      if (msgCurrentPage > totalPages) msgCurrentPage = totalPages;
+      var start = (msgCurrentPage - 1) * msgPageSize;
+      var pageMsgs = msgs.slice(start, start + msgPageSize);
+
+      var pageLabel = totalPages > 1 ? (' | 第 ' + msgCurrentPage + '/' + totalPages + ' 页') : '';
+      document.getElementById('msgCount').textContent = msgs.length + ' messages' + pageLabel;
       var tbody = document.getElementById('msgTableBody');
 
-      tbody.innerHTML = msgs.map(function(m) {
+      tbody.innerHTML = pageMsgs.map(function(m) {
         return '<tr class="msg-row' + (m.is_read ? '' : ' unread') + '" onclick="openMsgModal(' + m.id + ')">' +
           '<td><div style="font-weight:600;">' + escapeHtml(m.name) + '</div><div style="font-size:0.75rem;color:var(--admin-text-tertiary);">' + escapeHtml(m.email) + '</div></td>' +
           '<td>' + (m.phone || '—') + '</td>' +
@@ -108,7 +118,33 @@
           '<td><button class="admin-btn admin-btn-sm" style="color:#ef4444;border-color:#ef4444;" onclick="event.stopPropagation();deleteMsg(' + m.id + ')">🗑 删除</button></td>' +
           '</tr>';
       }).join('');
+
+      renderPagination(totalPages, 'msgPagination');
     }
+
+    function renderPagination(totalPages, containerId) {
+      var container = document.getElementById(containerId);
+      if (totalPages <= 1) { container.innerHTML = ''; return; }
+      var html = '<div class="pagination">';
+      html += '<button class="page-btn" ' + (msgCurrentPage === 1 ? 'disabled' : '') + ' onclick="goPage(' + (msgCurrentPage - 1) + ')">‹ 上一页</button>';
+      for (var i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= msgCurrentPage - 2 && i <= msgCurrentPage + 2)) {
+          html += '<button class="page-btn' + (i === msgCurrentPage ? ' active' : '') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+        } else if (i === 2 || i === totalPages - 1) {
+          html += '<span class="page-dots">…</span>';
+        }
+      }
+      html += '<button class="page-btn" ' + (msgCurrentPage === totalPages ? 'disabled' : '') + ' onclick="goPage(' + (msgCurrentPage + 1) + ')">下一页 ›</button>';
+      html += '<span class="page-info">共 ' + totalPages + ' 页</span>';
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    window.goPage = function(page) {
+      msgCurrentPage = page;
+      loadMessages();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     async function deleteMsg(id) {
       if (!confirm('确认删除这条留言？')) return;
