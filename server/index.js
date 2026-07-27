@@ -32,6 +32,37 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use('/uploads', express.static(UPLOAD_DIR));
 
+// ---- Page Visit Tracker ----
+async function ensureVisitsTable() {
+  try { await pool.query('SELECT 1 FROM page_visits LIMIT 0'); }
+  catch {
+    await pool.query(`CREATE TABLE page_visits (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      page VARCHAR(100) NOT NULL,
+      ip VARCHAR(45) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_date (created_at),
+      INDEX idx_page (page)
+    ) ENGINE=InnoDB`);
+    console.log('page_visits table auto-created');
+  }
+}
+
+const SKIP_PATHS = /^\/(api|uploads|admin|css|js|images|assets|favicon|\.)/;
+
+app.use(async (req, res, next) => {
+  // Only count frontend page visits
+  if (req.method === 'GET' && !SKIP_PATHS.test(req.path)) {
+    try {
+      await ensureVisitsTable();
+      const page = req.path === '/' ? '/' : req.path.split('?')[0];
+      const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+      pool.execute('INSERT INTO page_visits (page, ip) VALUES (?, ?)', [page, ip]).catch(() => {});
+    } catch {}
+  }
+  next();
+});
+
 // Serve frontend static files (index.html, css/, js/, etc.)
 const FRONTEND_DIR = path.join(__dirname, '..');
 app.use(express.static(FRONTEND_DIR));
@@ -635,7 +666,22 @@ app.get('/api/stats', async (req, res) => {
     const [[{mediaCount}]] = await pool.query('SELECT COUNT(*) as mediaCount FROM media');
     const [[{carouselCount}]] = await pool.query('SELECT COUNT(*) as carouselCount FROM carousel');
     const [[{revenue}]] = await pool.query('SELECT COALESCE(SUM(total), 0) as revenue FROM orders');
-    res.json({ productCount, newsCount, orderCount, userCount, mediaCount, carouselCount, revenue });
+    const [[{totalVisits}]] = await pool.query('SELECT COUNT(*) as totalVisits FROM page_visits');
+    const [[{todayVisits}]] = await pool.query('SELECT COUNT(*) as todayVisits FROM page_visits WHERE DATE(created_at) = CURDATE()');
+    res.json({ productCount, newsCount, orderCount, userCount, mediaCount, carouselCount, revenue, totalVisits, todayVisits });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Visits trend (last N days)
+app.get('/api/stats/visits', async (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 7;
+    await ensureVisitsTable();
+    const [rows] = await pool.query(
+      'SELECT DATE(created_at) as date, COUNT(*) as count FROM page_visits WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY) GROUP BY DATE(created_at) ORDER BY date',
+      [days]
+    );
+    res.json(rows);
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

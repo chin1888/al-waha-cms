@@ -161,6 +161,16 @@ CREATE TABLE IF NOT EXISTS product_gallery (
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
+-- ===== Page Visits (tracking) =====
+CREATE TABLE IF NOT EXISTS page_visits (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  page        VARCHAR(100) NOT NULL,
+  ip          VARCHAR(45) NOT NULL,
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_date (created_at),
+  INDEX idx_page (page)
+) ENGINE=InnoDB;
+
 -- ===== Collage Photos =====
 CREATE TABLE IF NOT EXISTS collage_photos (
   id          INT AUTO_INCREMENT PRIMARY KEY,
