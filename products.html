@@ -11,18 +11,17 @@
   <style>
     body { overflow-x: clip; }
     .gal-section { padding: 0; }
-    .gal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 2px; width: 100%; }
-    @media (max-width: 640px) { .gal-grid { grid-template-columns: repeat(2, 1fr); gap: 1px; } }
-    .gal-item { position: relative; overflow: hidden; cursor: pointer; aspect-ratio: 1/1; background: var(--bg-secondary); }
-    .gal-item img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
-    .gal-item:hover img { transform: scale(1.03); }
-    .gal-empty { text-align: center; padding: 40px; color: var(--text-secondary); display: none; }
-    .lb { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.92); z-index: 9999; align-items: center; justify-content: center; }
-    .lb.on { display: flex; }
-    .lb img { max-width: 92vw; max-height: 92vh; border-radius: 12px; }
-    .lb-x { position: absolute; top: 24px; right: 32px; font-size: 2rem; color: #fff; cursor: pointer; background: none; border: none; }
-    .lb-prev, .lb-next { position: absolute; top: 50%; transform: translateY(-50%); font-size: 2.5rem; color: #fff; cursor: pointer; background: none; border: none; padding: 16px; opacity: .7; }
-    .lb-prev { left: 8px; } .lb-next { right: 8px; }
+    .gal-hero {
+      width: 100vw; margin-left: calc(-50vw + 50%); height: 70vh; min-height: 420px;
+      position: relative; overflow: hidden; background: var(--bg-secondary);
+    }
+    .gal-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gal-hero .gal-label {
+      position: absolute; bottom: 24px; left: 24px;
+      color: #fff; font-size: 1.2rem; font-weight: 700;
+      text-shadow: 0 2px 8px rgba(0,0,0,.5);
+    }
+    .gal-empty { text-align: center; padding: 80px 16px; color: var(--text-secondary); display: none; }
   </style>
 </head>
 <body data-page="products">
@@ -55,7 +54,10 @@
 
   <!-- ===== Image Gallery ===== -->
   <section class="gal-section">
-    <div class="gal-grid" id="galGrid"></div>
+    <div class="gal-hero" id="galHero">
+      <img id="galImg" src="" alt="" style="display:none;">
+      <div class="gal-label" id="galLabel"></div>
+    </div>
     <div class="gal-empty" id="galEmpty"><div style="font-size:3rem;">🖼️</div><p>Upload images in <a href="admin/gallery.html">admin gallery</a></p></div>
   </section>
 
@@ -96,9 +98,6 @@
       </div>
     </div>
   </section>
-
-  <!-- Lightbox -->
-  <div class="lb" id="lb"><button class="lb-x" onclick="lbClose()">×</button><button class="lb-prev" onclick="lbNav(-1)">‹</button><img id="lbImg" src=""><button class="lb-next" onclick="lbNav(1)">›</button></div>
 
   <div id="footer-container"></div>
 
@@ -242,15 +241,12 @@
         ? 'http://localhost:3001/api/product-gallery' : '/api/product-gallery';
       var allImages = [];
       var filter = 'all';
-      var lbIdx = 0;
 
-      // Load images
       fetch(url).then(function(r) { return r.ok ? r.json() : []; }).then(function(imgs) {
         allImages = imgs;
         refresh();
       }).catch(function() { refresh(); });
 
-      // Listen to tab clicks
       document.addEventListener('click', function(e) {
         var tag = e.target.closest('.filter-tag');
         if (!tag) return;
@@ -259,40 +255,17 @@
       });
 
       function refresh() {
-        var imgs = filter === 'all' ? allImages : allImages.filter(function(i) { return i.category === filter; });
-        var grid = document.getElementById('galGrid');
+        var pool = filter === 'all' ? allImages : allImages.filter(function(i) { return i.category === filter; });
+        var img = document.getElementById('galImg');
+        var label = document.getElementById('galLabel');
         var empty = document.getElementById('galEmpty');
-        if (!imgs.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+        if (!pool.length) { img.style.display = 'none'; empty.style.display = 'block'; return; }
         empty.style.display = 'none';
-        window._gImages = imgs;
-        grid.innerHTML = imgs.map(function(img, idx) {
-          return '<div class="gal-item" onclick="lbOpen(' + idx + ')"><img src="' + img.image + '" loading="lazy"></div>';
-        }).join('');
+        var pick = pool[0]; // first image of the category
+        img.src = pick.image;
+        img.style.display = 'block';
+        label.textContent = pick.category;
       }
-
-      // Lightbox
-      window.lbOpen = function(i) {
-        if (!window._gImages || !window._gImages.length) return;
-        lbIdx = i;
-        document.getElementById('lbImg').src = window._gImages[i].image;
-        document.getElementById('lb').classList.add('on');
-        document.body.style.overflow = 'hidden';
-      };
-      window.lbClose = function() {
-        document.getElementById('lb').classList.remove('on');
-        document.body.style.overflow = '';
-      };
-      window.lbNav = function(d) {
-        if (!window._gImages || !window._gImages.length) return;
-        lbIdx = (lbIdx + d + window._gImages.length) % window._gImages.length;
-        document.getElementById('lbImg').src = window._gImages[lbIdx].image;
-      };
-      document.addEventListener('keydown', function(e) {
-        if (!document.getElementById('lb').classList.contains('on')) return;
-        if (e.key === 'Escape') lbClose();
-        if (e.key === 'ArrowLeft') lbNav(-1);
-        if (e.key === 'ArrowRight') lbNav(1);
-      });
     })();
   </script>
 </body>
