@@ -120,6 +120,11 @@
     </div>
   </section>
 
+  <!-- Product Cards Listing -->
+  <section style="padding: 0 0 var(--space-3xl) 0;">
+    <div class="container" id="productsContainer"></div>
+  </section>
+
   <!-- Lightbox -->
   <div class="lightbox" id="lightbox">
     <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
@@ -168,11 +173,15 @@
 
       var currentFilter = 'all';
       var currentImages = [];
+      var allProducts = [];
       var lightboxIndex = 0;
 
       // API helper
       var API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
         ? 'http://localhost:3001/api' : '/api';
+
+      // Load products
+      try { allProducts = await CMS.getAllProducts(); } catch(e) { allProducts = []; }
 
       // Filter clicks
       document.querySelectorAll('#filterTags .filter-tag').forEach(function(btn) {
@@ -181,6 +190,7 @@
           btn.classList.add('active');
           currentFilter = btn.dataset.filter;
           loadGallery();
+          renderProductCards();
         });
       });
 
@@ -198,17 +208,67 @@
         if (currentImages.length === 0) {
           grid.innerHTML = '';
           empty.style.display = 'block';
-          return;
+        } else {
+          empty.style.display = 'none';
+          grid.innerHTML = currentImages.map(function(img, idx) {
+            return '<div class="gallery-item reveal" onclick="openLightbox(' + idx + ')">' +
+              '<img src="' + img.image + '" alt="" loading="lazy">' +
+              '<div class="overlay"><span>' + (img.category || currentFilter) + '</span></div>' +
+              '</div>';
+          }).join('');
         }
-        empty.style.display = 'none';
+      }
 
-        grid.innerHTML = currentImages.map(function(img, idx) {
-          return '<div class="gallery-item reveal" onclick="openLightbox(' + idx + ')">' +
-            '<img src="' + img.image + '" alt="" loading="lazy">' +
-            '<div class="overlay"><span>' + (img.category || currentFilter) + '</span></div>' +
-            '</div>';
-        }).join('');
+      function renderProductCards() {
+        var container = document.getElementById('productsContainer');
+        var filtered = currentFilter === 'all'
+          ? allProducts
+          : allProducts.filter(function(p) { return p.category === currentFilter; });
 
+        if (filtered.length === 0) { container.innerHTML = ''; return; }
+
+        // Group by series
+        var seriesMap = {};
+        filtered.forEach(function(p) {
+          var s = p.series || 'Other';
+          if (!seriesMap[s]) seriesMap[s] = [];
+          seriesMap[s].push(p);
+        });
+        var seriesOrder = ['Gear','Star','Vista','Rave','Neon','Ace','Nex','Joygo','Switch','Magic'];
+        var seriesNames = Object.keys(seriesMap).sort(function(a,b) {
+          var ia = seriesOrder.indexOf(a), ib = seriesOrder.indexOf(b);
+          return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+        });
+
+        var html = '';
+        seriesNames.forEach(function(series) {
+          html += '<div class="series-section">';
+          html += '<div class="series-header">';
+          html += '<h2 class="series-name">' + series + ' Series</h2>';
+          html += '<span class="series-count">' + seriesMap[series].length + ' product(s)</span>';
+          html += '</div>';
+          html += '<div class="product-grid">';
+          html += seriesMap[series].map(function(p) {
+            return '<div class="product-card reveal" onclick="window.location.href=\'product-detail.html?id=' + p.id + '\'">' +
+              (p.badge ? '<div class="product-badge">' + p.badge + '</div>' : '') +
+              '<div class="product-image">' +
+                (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/) || p.image.match(/^\//))
+                  ? '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy">'
+                  : '<div class="product-visual" style="background:' + (p.gradient || 'linear-gradient(135deg,#667eea,#764ba2)') + ';">' + (p.image || p.name.charAt(0)) + '</div>'
+                ) +
+              '</div>' +
+              '<div class="product-info">' +
+                '<div class="product-category">' + p.category + '</div>' +
+                '<h3 class="product-name">' + p.name + '</h3>' +
+                '<div class="product-meta">' +
+                  '<span class="product-puffs">' + ((p.specs && p.specs.puffs) || p.puffs || '') + '</span>' +
+                  '<span class="product-link">Learn More &rarr;</span>' +
+                '</div>' +
+              '</div></div>';
+          }).join('');
+          html += '</div></div>';
+        });
+        container.innerHTML = html;
         setTimeout(function() { if (window.initScrollReveal) initScrollReveal(); }, 100);
       }
 
@@ -235,6 +295,7 @@
       });
 
       loadGallery();
+      renderProductCards();
     });
   </script>
 </body>
