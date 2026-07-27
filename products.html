@@ -166,127 +166,100 @@
   <script src="js/content-store.js"></script>
   <script src="js/components.js"></script>
   <script>
-    (function() {
+    document.addEventListener('DOMContentLoaded', async function() {
+      // CMS init (non-blocking)
+      try { await CMS.init(); CMS.applyToPage(); } catch(e) {}
+      if (window._initMegaMenu) window._initMegaMenu();
+
+      var API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+        ? 'http://localhost:3001/api' : '/api';
       var currentFilter = 'all';
       var currentImages = [];
       var allProducts = [];
-      var lightboxIndex = 0;
-      var API = '';
-      var ready = false;
+      var lightboxIdx = 0;
 
-      async function init() {
-        API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-          ? 'http://localhost:3001/api' : '/api';
+      // Load all data
+      try { allProducts = await CMS.getAllProducts(); } catch(e) { allProducts = []; }
+      try {
+        var r = await fetch(API + '/product-gallery');
+        if (r.ok) currentImages = await r.json();
+      } catch(e) {}
 
-        // Init CMS (don't block on failure)
-        try { await CMS.init(); CMS.applyToPage(); } catch(e) { console.warn('CMS init failed:', e.message); }
-        if (window._initMegaMenu) window._initMegaMenu();
+      // Render both sections
+      renderGallery();
+      renderCards();
 
-        // Load products
-        try { allProducts = await CMS.getAllProducts(); } catch(e) { console.warn('Load products failed:', e.message); allProducts = []; }
-
-        ready = true;
-        loadGallery();
-        renderProductCards();
-      }
-
-      // Filter clicks
+      // Filter tab clicks
       document.getElementById('filterTags').addEventListener('click', function(e) {
-        if (!e.target.classList.contains('filter-tag')) return;
+        var btn = e.target.closest('.filter-tag');
+        if (!btn) return;
         document.querySelectorAll('#filterTags .filter-tag').forEach(function(b) { b.classList.remove('active'); });
-        e.target.classList.add('active');
-        currentFilter = e.target.dataset.filter;
-        if (ready) { loadGallery(); renderProductCards(); }
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        renderGallery();
+        renderCards();
       });
 
-      async function loadGallery() {
+      function renderGallery() {
         var grid = document.getElementById('galleryGrid');
         var empty = document.getElementById('galleryEmpty');
-        grid.innerHTML = '';
+        var imgs = currentFilter === 'all'
+          ? currentImages
+          : currentImages.filter(function(img) { return img.category === currentFilter; });
+
+        if (!imgs.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
         empty.style.display = 'none';
-
-        var url = API + '/product-gallery';
-        if (currentFilter !== 'all') url += '?category=' + currentFilter;
-        try {
-          var res = await fetch(url);
-          if (!res.ok) throw new Error('API ' + res.status);
-          currentImages = await res.json();
-        } catch(e) {
-          console.warn('Gallery load failed:', e.message);
-          currentImages = [];
-        }
-
-        if (currentImages.length === 0) {
-          empty.style.display = 'block';
-          return;
-        }
-        grid.innerHTML = currentImages.map(function(img, idx) {
-          return '<div class="gallery-item reveal" onclick="openLightbox(' + idx + ')">' +
+        grid.innerHTML = imgs.map(function(img, idx) {
+          return '<div class="gallery-item reveal" onclick="window._lbOpen(' + idx + ')">' +
             '<img src="' + img.image + '" alt="" loading="lazy">' +
-            '<div class="overlay"><span>' + (img.category || currentFilter) + '</span></div>' +
-            '</div>';
+            '<div class="overlay"><span>' + (img.category || '') + '</span></div></div>';
         }).join('');
+        window._lbImages = imgs;
       }
 
-      function renderProductCards() {
+      function renderCards() {
         var container = document.getElementById('productsContainer');
-        if (!allProducts.length) { container.innerHTML = ''; return; }
-
         var filtered = currentFilter === 'all'
           ? allProducts
           : allProducts.filter(function(p) { return p.category === currentFilter; });
-
         if (!filtered.length) { container.innerHTML = ''; return; }
 
-        var seriesMap = {};
+        var map = {};
         filtered.forEach(function(p) {
           var s = p.series || 'Other';
-          if (!seriesMap[s]) seriesMap[s] = [];
-          seriesMap[s].push(p);
+          if (!map[s]) map[s] = [];
+          map[s].push(p);
         });
-        var seriesOrder = ['Gear','Star','Vista','Rave','Neon','Ace','Nex','Joygo','Switch','Magic'];
-        var seriesNames = Object.keys(seriesMap).sort(function(a,b) {
-          var ia = seriesOrder.indexOf(a), ib = seriesOrder.indexOf(b);
-          return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+        var order = ['Gear','Star','Vista','Rave','Neon','Ace','Nex','Joygo','Switch','Magic'];
+        var names = Object.keys(map).sort(function(a,b) {
+          return (order.indexOf(a)===-1?999:order.indexOf(a)) - (order.indexOf(b)===-1?999:order.indexOf(b));
         });
-
-        var html = '';
-        seriesNames.forEach(function(series) {
-          html += '<div class="series-section">';
-          html += '<div class="series-header">';
-          html += '<h2 class="series-name">' + series + ' Series</h2>';
-          html += '<span class="series-count">' + seriesMap[series].length + ' product(s)</span>';
-          html += '</div>';
-          html += '<div class="product-grid">';
-          html += seriesMap[series].map(function(p) {
-            return '<div class="product-card reveal" onclick="window.location.href=\'product-detail.html?id=' + p.id + '\'">' +
+        var h = '';
+        names.forEach(function(s) {
+          h += '<div class="series-section"><div class="series-header"><h2 class="series-name">' + s + ' Series</h2><span class="series-count">' + map[s].length + ' product(s)</span></div><div class="product-grid">';
+          h += map[s].map(function(p) {
+            return '<div class="product-card reveal" onclick="location.href=\'product-detail.html?id=' + p.id + '\'">' +
               (p.badge ? '<div class="product-badge">' + p.badge + '</div>' : '') +
               '<div class="product-image">' +
                 (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/) || p.image.match(/^\//))
                   ? '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy">'
-                  : '<div class="product-visual" style="background:' + (p.gradient || 'linear-gradient(135deg,#667eea,#764ba2)') + ';">' + (p.image || p.name.charAt(0)) + '</div>'
-                ) +
+                  : '<div class="product-visual" style="background:' + (p.gradient || 'linear-gradient(135deg,#667eea,#764ba2)') + ';">' + (p.image || p.name.charAt(0)) + '</div>') +
               '</div>' +
-              '<div class="product-info">' +
-                '<div class="product-category">' + p.category + '</div>' +
-                '<h3 class="product-name">' + p.name + '</h3>' +
-                '<div class="product-meta">' +
-                  '<span class="product-puffs">' + ((p.specs && p.specs.puffs) || p.puffs || '') + '</span>' +
-                  '<span class="product-link">Learn More &rarr;</span>' +
-                '</div>' +
-              '</div></div>';
+              '<div class="product-info"><div class="product-category">' + p.category + '</div><h3 class="product-name">' + p.name + '</h3>' +
+              '<div class="product-meta"><span class="product-puffs">' + ((p.specs && p.specs.puffs) || p.puffs || '') + '</span><span class="product-link">Learn More &rarr;</span></div></div></div>';
           }).join('');
-          html += '</div></div>';
+          h += '</div></div>';
         });
-        container.innerHTML = html;
+        container.innerHTML = h;
         setTimeout(function() { if (window.initScrollReveal) initScrollReveal(); }, 100);
       }
 
       // Lightbox
-      window.openLightbox = function(idx) {
-        if (!currentImages.length) return;
-        lightboxIndex = idx;
-        document.getElementById('lightboxImg').src = currentImages[idx].image;
+      window._lbImages = currentImages;
+      window._lbOpen = function(i) {
+        if (!window._lbImages || !window._lbImages.length) return;
+        lightboxIdx = i;
+        document.getElementById('lightboxImg').src = window._lbImages[i].image;
         document.getElementById('lightbox').classList.add('active');
         document.body.style.overflow = 'hidden';
       };
@@ -294,10 +267,10 @@
         document.getElementById('lightbox').classList.remove('active');
         document.body.style.overflow = '';
       };
-      window.navigateLightbox = function(dir) {
-        if (!currentImages.length) return;
-        lightboxIndex = (lightboxIndex + dir + currentImages.length) % currentImages.length;
-        document.getElementById('lightboxImg').src = currentImages[lightboxIndex].image;
+      window.navigateLightbox = function(d) {
+        if (!window._lbImages || !window._lbImages.length) return;
+        lightboxIdx = (lightboxIdx + d + window._lbImages.length) % window._lbImages.length;
+        document.getElementById('lightboxImg').src = window._lbImages[lightboxIdx].image;
       };
       document.addEventListener('keydown', function(e) {
         if (!document.getElementById('lightbox').classList.contains('active')) return;
@@ -305,9 +278,7 @@
         if (e.key === 'ArrowLeft') navigateLightbox(-1);
         if (e.key === 'ArrowRight') navigateLightbox(1);
       });
-
-      init();
-    })();
+    });
   </script>
 </body>
 </html>
