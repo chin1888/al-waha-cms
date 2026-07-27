@@ -4,13 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Products - AL-WAHA | Make Joy Happen</title>
-  <meta name="description" content="Explore AL-WAHA's full range of premium vape products including disposables and pod systems.">
+  <meta name="description" content="Explore AL-WAHA's full range of premium vape products.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
-    /* Full-bleed gallery */
-    .gallery-section { padding: var(--space-xl) 0 var(--space-3xl) 0; }
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -21,67 +19,22 @@
       .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 8px; }
     }
     .gallery-item {
-      position: relative;
-      overflow: hidden;
-      border-radius: 12px;
-      cursor: pointer;
-      aspect-ratio: 1 / 1;
-      background: var(--bg-secondary);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative; overflow: hidden; border-radius: 12px; cursor: pointer;
+      aspect-ratio: 1/1; background: var(--bg-secondary);
+      transition: transform .3s, box-shadow .3s;
     }
-    .gallery-item:hover {
-      transform: scale(1.02);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    }
-    .gallery-item img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.4s ease;
-    }
+    .gallery-item:hover { transform: scale(1.02); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .gallery-item img { width:100%; height:100%; object-fit:cover; transition: transform .4s; }
     .gallery-item:hover img { transform: scale(1.05); }
-    .gallery-item .overlay {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      padding: 20px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .gallery-item:hover .overlay { opacity: 1; }
-    .gallery-item .overlay span {
-      color: #fff;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
+    .gallery-empty { text-align:center; padding:40px 16px; color:var(--text-secondary); display:none; }
+    .gallery-empty .icon { font-size:3rem; margin-bottom:8px; }
 
-    /* Lightbox */
-    .lightbox {
-      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.92); z-index: 9999;
-      align-items: center; justify-content: center;
-    }
-    .lightbox.active { display: flex; }
-    .lightbox img { max-width: 92vw; max-height: 92vh; border-radius: 12px; }
-    .lightbox-close {
-      position: absolute; top: 24px; right: 32px;
-      font-size: 2rem; color: #fff; cursor: pointer; background: none; border: none;
-      z-index: 1;
-    }
-    .lightbox-prev, .lightbox-next {
-      position: absolute; top: 50%; transform: translateY(-50%);
-      font-size: 2.5rem; color: #fff; cursor: pointer; background: none; border: none;
-      padding: 16px; opacity: 0.7; transition: opacity 0.2s;
-    }
-    .lightbox-prev:hover, .lightbox-next:hover { opacity: 1; }
-    .lightbox-prev { left: 8px; }
-    .lightbox-next { right: 8px; }
-
-    /* Empty state */
-    .gallery-empty {
-      text-align: center; padding: 80px 16px; color: var(--text-secondary);
-    }
-    .gallery-empty .icon { font-size: 4rem; margin-bottom: 16px; }
+    .lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,.92); z-index:9999; align-items:center; justify-content:center; }
+    .lightbox.active { display:flex; }
+    .lightbox img { max-width:92vw; max-height:92vh; border-radius:12px; }
+    .lightbox-close { position:absolute; top:24px; right:32px; font-size:2rem; color:#fff; cursor:pointer; background:none; border:none; }
+    .lightbox-prev, .lightbox-next { position:absolute; top:50%; transform:translateY(-50%); font-size:2.5rem; color:#fff; cursor:pointer; background:none; border:none; padding:16px; opacity:.7; }
+    .lightbox-prev { left:8px; } .lightbox-next { right:8px; }
   </style>
 </head>
 <body data-page="products">
@@ -89,15 +42,14 @@
   <div id="age-modal-container"></div>
   <div id="navbar-container"></div>
 
-  <!-- Page Header -->
   <div class="page-header">
     <div class="container">
       <h1 data-cms="products._pageTitle" data-cms-auto-gradient>Our Products</h1>
-      <p data-cms="products._pageDesc">Discover the full range of AL-WAHA premium vaping devices — engineered for performance, designed for life.</p>
+      <p data-cms="products._pageDesc">Discover the full range of AL-WAHA premium vaping devices.</p>
     </div>
   </div>
 
-  <!-- Filter Tabs -->
+  <!-- Tabs -->
   <section style="padding: var(--space-xl) 0 0 0;">
     <div class="container">
       <div class="filter-bar" style="justify-content: center;">
@@ -111,85 +63,65 @@
     </div>
   </section>
 
-  <!-- Full-bleed Image Gallery -->
-  <section class="gallery-section">
-    <div class="gallery-grid" id="galleryGrid"></div>
-    <div class="gallery-empty" id="galleryEmpty" style="display:none;">
-      <div class="icon">🖼️</div>
-      <h3>No images yet</h3>
+  <!-- Gallery -->
+  <section style="padding: var(--space-xl) 0 0 0;" id="gallerySection">
+    <div class="container" style="max-width:100%;">
+      <div class="gallery-grid" id="galleryGrid"></div>
+      <div class="gallery-empty" id="galleryEmpty"><div class="icon">🖼️</div><p>No images yet — upload from <a href="admin/gallery.html">admin gallery</a></p></div>
     </div>
   </section>
 
-  <!-- Product Cards Listing -->
-  <section style="padding: 0 0 var(--space-3xl) 0;">
+  <!-- Product Cards -->
+  <section style="padding: var(--space-xl) 0 var(--space-3xl) 0;">
     <div class="container" id="productsContainer"></div>
+    <div id="noResults" style="display:none;text-align:center;padding:80px 0;">
+      <div style="font-size:3rem;margin-bottom:16px;">🔍</div>
+      <h3>No products found</h3>
+    </div>
   </section>
 
   <!-- Lightbox -->
   <div class="lightbox" id="lightbox">
-    <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
-    <button class="lightbox-prev" onclick="navigateLightbox(-1)">&#8249;</button>
+    <button class="lightbox-close" onclick="closeLightbox()">×</button>
+    <button class="lightbox-prev" onclick="navigateLightbox(-1)">‹</button>
     <img id="lightboxImg" src="" alt="">
-    <button class="lightbox-next" onclick="navigateLightbox(1)">&#8250;</button>
+    <button class="lightbox-next" onclick="navigateLightbox(1)">›</button>
   </div>
-
-  <!-- Features Bar -->
-  <section style="background: var(--bg-secondary); padding: var(--space-2xl) 0; border-top: 1px solid var(--border-color);">
-    <div class="container">
-      <div class="features-grid">
-        <div class="feature-card" style="text-align: left;">
-          <div class="feature-icon" style="background: rgba(108, 60, 224, 0.08); margin: 0 0 16px 0;">&#128666;</div>
-          <h3 class="feature-title">Global Shipping</h3>
-          <p class="feature-desc">Fast and reliable shipping to 30+ countries worldwide.</p>
-        </div>
-        <div class="feature-card" style="text-align: left;">
-          <div class="feature-icon" style="background: rgba(236, 72, 153, 0.08); margin: 0 0 16px 0;">&#9989;</div>
-          <h3 class="feature-title">Authenticity Guaranteed</h3>
-          <p class="feature-desc">Every product comes with a verification code. 100% genuine.</p>
-        </div>
-        <div class="feature-card" style="text-align: left;">
-          <div class="feature-icon" style="background: rgba(6, 182, 212, 0.08); margin: 0 0 16px 0;">&#128295;</div>
-          <h3 class="feature-title">Warranty Support</h3>
-          <p class="feature-desc">Comprehensive warranty coverage on all AL-WAHA devices.</p>
-        </div>
-        <div class="feature-card" style="text-align: left;">
-          <div class="feature-icon" style="background: rgba(16, 185, 129, 0.08); margin: 0 0 16px 0;">&#128172;</div>
-          <h3 class="feature-title">24/7 Support</h3>
-          <p class="feature-desc">Our customer support team is always here to help.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <div id="footer-container"></div>
 
   <script src="js/content-store.js"></script>
+  <script src="js/data.js"></script>
   <script src="js/components.js"></script>
   <script>
+    var API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+      ? 'http://localhost:3001/api' : '/api';
+    var currentFilter = 'all';
+    var galleryImages = [];
+    var allProducts = [];
+    var lbIdx = 0;
+
     document.addEventListener('DOMContentLoaded', async function() {
-      // CMS init (non-blocking)
-      try { await CMS.init(); CMS.applyToPage(); } catch(e) {}
+      await CMS.init();
+      CMS.applyToPage();
       if (window._initMegaMenu) window._initMegaMenu();
 
-      var API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-        ? 'http://localhost:3001/api' : '/api';
-      var currentFilter = 'all';
-      var currentImages = [];
-      var allProducts = [];
-      var lightboxIdx = 0;
-
-      // Load all data
-      try { allProducts = await CMS.getAllProducts(); } catch(e) { allProducts = []; }
+      // Load data
+      try { allProducts = await CMS.getAllProducts(); } catch(e) {}
       try {
         var r = await fetch(API + '/product-gallery');
-        if (r.ok) currentImages = await r.json();
+        if (r.ok) galleryImages = await r.json();
       } catch(e) {}
 
-      // Render both sections
+      buildFilterTags();
       renderGallery();
-      renderCards();
+      renderProducts();
+    });
 
-      // Filter tab clicks
+    function buildFilterTags() {
+      var cats = [];
+      allProducts.forEach(function(p) { if (p.category && cats.indexOf(p.category) === -1) cats.push(p.category); });
+      // Tabs are already hardcoded in HTML, just bind events
       document.getElementById('filterTags').addEventListener('click', function(e) {
         var btn = e.target.closest('.filter-tag');
         if (!btn) return;
@@ -197,87 +129,89 @@
         btn.classList.add('active');
         currentFilter = btn.dataset.filter;
         renderGallery();
-        renderCards();
+        renderProducts();
+      });
+    }
+
+    function renderGallery() {
+      var imgs = currentFilter === 'all' ? galleryImages : galleryImages.filter(function(i) { return i.category === currentFilter; });
+      var grid = document.getElementById('galleryGrid');
+      var empty = document.getElementById('galleryEmpty');
+      if (!imgs.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+      empty.style.display = 'none';
+      window._galleryImages = imgs;
+      grid.innerHTML = imgs.map(function(img, idx) {
+        return '<div class="gallery-item" onclick="openLightbox(' + idx + ')"><img src="' + img.image + '" alt="" loading="lazy"></div>';
+      }).join('');
+    }
+
+    function renderProducts() {
+      var filtered = allProducts.filter(function(p) {
+        return currentFilter === 'all' || p.category === currentFilter;
       });
 
-      function renderGallery() {
-        var grid = document.getElementById('galleryGrid');
-        var empty = document.getElementById('galleryEmpty');
-        var imgs = currentFilter === 'all'
-          ? currentImages
-          : currentImages.filter(function(img) { return img.category === currentFilter; });
+      if (!filtered.length) {
+        document.getElementById('productsContainer').style.display = 'none';
+        document.getElementById('noResults').style.display = 'block';
+        return;
+      }
+      document.getElementById('productsContainer').style.display = 'block';
+      document.getElementById('noResults').style.display = 'none';
 
-        if (!imgs.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
-        empty.style.display = 'none';
-        grid.innerHTML = imgs.map(function(img, idx) {
-          return '<div class="gallery-item reveal" onclick="window._lbOpen(' + idx + ')">' +
-            '<img src="' + img.image + '" alt="" loading="lazy">' +
-            '<div class="overlay"><span>' + (img.category || '') + '</span></div></div>';
+      // Group by series
+      var map = {};
+      filtered.forEach(function(p) {
+        var s = p.series || 'Other';
+        if (!map[s]) map[s] = [];
+        map[s].push(p);
+      });
+      var order = ['Gear','Star','Vista','Rave','Neon','Ace','Nex','Joygo','Switch','Magic'];
+      var names = Object.keys(map).sort(function(a,b) {
+        return (order.indexOf(a)===-1?999:order.indexOf(a)) - (order.indexOf(b)===-1?999:order.indexOf(b));
+      });
+
+      var html = '';
+      names.forEach(function(s) {
+        html += '<div class="series-section"><div class="series-header"><h2 class="series-name">' + s + ' Series</h2><span class="series-count">' + map[s].length + ' product(s)</span></div><div class="product-grid">';
+        html += map[s].map(function(p) {
+          return '<div class="product-card reveal" onclick="location.href=\'product-detail.html?id=' + p.id + '\'">' +
+            (p.badge ? '<div class="product-badge">' + p.badge + '</div>' : '') +
+            '<div class="product-image">' +
+              (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/) || p.image.match(/^\//))
+                ? '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy">'
+                : '<div class="product-visual" style="background:' + (p.gradient || 'linear-gradient(135deg,#667eea,#764ba2)') + ';">' + (p.image || p.name.charAt(0)) + '</div>') +
+            '</div>' +
+            '<div class="product-info"><div class="product-category">' + p.category + '</div><h3 class="product-name">' + p.name + '</h3>' +
+            '<div class="product-meta"><span class="product-puffs">' + ((p.specs && p.specs.puffs) || p.puffs || '') + '</span><span class="product-link">Learn More →</span></div></div></div>';
         }).join('');
-        window._lbImages = imgs;
-      }
-
-      function renderCards() {
-        var container = document.getElementById('productsContainer');
-        var filtered = currentFilter === 'all'
-          ? allProducts
-          : allProducts.filter(function(p) { return p.category === currentFilter; });
-        if (!filtered.length) { container.innerHTML = ''; return; }
-
-        var map = {};
-        filtered.forEach(function(p) {
-          var s = p.series || 'Other';
-          if (!map[s]) map[s] = [];
-          map[s].push(p);
-        });
-        var order = ['Gear','Star','Vista','Rave','Neon','Ace','Nex','Joygo','Switch','Magic'];
-        var names = Object.keys(map).sort(function(a,b) {
-          return (order.indexOf(a)===-1?999:order.indexOf(a)) - (order.indexOf(b)===-1?999:order.indexOf(b));
-        });
-        var h = '';
-        names.forEach(function(s) {
-          h += '<div class="series-section"><div class="series-header"><h2 class="series-name">' + s + ' Series</h2><span class="series-count">' + map[s].length + ' product(s)</span></div><div class="product-grid">';
-          h += map[s].map(function(p) {
-            return '<div class="product-card reveal" onclick="location.href=\'product-detail.html?id=' + p.id + '\'">' +
-              (p.badge ? '<div class="product-badge">' + p.badge + '</div>' : '') +
-              '<div class="product-image">' +
-                (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/) || p.image.match(/^\//))
-                  ? '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy">'
-                  : '<div class="product-visual" style="background:' + (p.gradient || 'linear-gradient(135deg,#667eea,#764ba2)') + ';">' + (p.image || p.name.charAt(0)) + '</div>') +
-              '</div>' +
-              '<div class="product-info"><div class="product-category">' + p.category + '</div><h3 class="product-name">' + p.name + '</h3>' +
-              '<div class="product-meta"><span class="product-puffs">' + ((p.specs && p.specs.puffs) || p.puffs || '') + '</span><span class="product-link">Learn More &rarr;</span></div></div></div>';
-          }).join('');
-          h += '</div></div>';
-        });
-        container.innerHTML = h;
-        setTimeout(function() { if (window.initScrollReveal) initScrollReveal(); }, 100);
-      }
-
-      // Lightbox
-      window._lbImages = currentImages;
-      window._lbOpen = function(i) {
-        if (!window._lbImages || !window._lbImages.length) return;
-        lightboxIdx = i;
-        document.getElementById('lightboxImg').src = window._lbImages[i].image;
-        document.getElementById('lightbox').classList.add('active');
-        document.body.style.overflow = 'hidden';
-      };
-      window.closeLightbox = function() {
-        document.getElementById('lightbox').classList.remove('active');
-        document.body.style.overflow = '';
-      };
-      window.navigateLightbox = function(d) {
-        if (!window._lbImages || !window._lbImages.length) return;
-        lightboxIdx = (lightboxIdx + d + window._lbImages.length) % window._lbImages.length;
-        document.getElementById('lightboxImg').src = window._lbImages[lightboxIdx].image;
-      };
-      document.addEventListener('keydown', function(e) {
-        if (!document.getElementById('lightbox').classList.contains('active')) return;
-        if (e.key === 'Escape') closeLightbox();
-        if (e.key === 'ArrowLeft') navigateLightbox(-1);
-        if (e.key === 'ArrowRight') navigateLightbox(1);
+        html += '</div></div>';
       });
+      document.getElementById('productsContainer').innerHTML = html;
+      setTimeout(function() { if (window.initScrollReveal) initScrollReveal(); }, 100);
+    }
+
+    // Lightbox
+    window.openLightbox = function(idx) {
+      if (!window._galleryImages || !window._galleryImages.length) return;
+      lbIdx = idx;
+      document.getElementById('lightboxImg').src = window._galleryImages[idx].image;
+      document.getElementById('lightbox').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    };
+    window.closeLightbox = function() {
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = '';
+    };
+    window.navigateLightbox = function(dir) {
+      if (!window._galleryImages || !window._galleryImages.length) return;
+      lbIdx = (lbIdx + dir + window._galleryImages.length) % window._galleryImages.length;
+      document.getElementById('lightboxImg').src = window._galleryImages[lbIdx].image;
+    };
+    document.addEventListener('keydown', function(e) {
+      if (!document.getElementById('lightbox').classList.contains('active')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') navigateLightbox(-1);
+      if (e.key === 'ArrowRight') navigateLightbox(1);
     });
   </script>
 </body>
