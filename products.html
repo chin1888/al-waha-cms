@@ -120,11 +120,16 @@
 
     // ====== PRODUCTS ======
     (function loadProducts() {
-      CMS.init().then(function() { CMS.applyToPage(); }).catch(function(){});
-      CMS.getAllProducts().then(function(prods) {
+      CMS.init().then(function() {
+        CMS.applyToPage();
+        return CMS.getAllProducts();
+      }).then(function(prods) {
         allProducts = prods;
         renderProducts();
-      }).catch(function() { allProducts = []; renderProducts(); });
+      }).catch(function() { 
+        allProducts = []; 
+        renderProducts(); 
+      });
     })();
 
     function renderProducts() {
