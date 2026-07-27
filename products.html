@@ -12,11 +12,13 @@
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-      padding: 0 16px;
+      gap: 4px;
+      padding: 0;
+      width: 100vw;
+      margin-left: calc(-50vw + 50%);
     }
     @media (max-width: 640px) {
-      .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 0 8px; }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 2px; }
     }
     .gallery-item {
       position: relative; overflow: hidden; border-radius: 12px; cursor: pointer;
@@ -65,10 +67,8 @@
 
   <!-- Gallery -->
   <section style="padding: var(--space-xl) 0 0 0;" id="gallerySection">
-    <div class="container" style="max-width:100%;">
-      <div class="gallery-grid" id="galleryGrid"></div>
-      <div class="gallery-empty" id="galleryEmpty"><div class="icon">🖼️</div><p>No images yet — upload from <a href="admin/gallery.html">admin gallery</a></p></div>
-    </div>
+    <div class="gallery-grid" id="galleryGrid"></div>
+    <div class="gallery-empty" id="galleryEmpty"><div class="icon">🖼️</div><p>No images yet — upload from <a href="admin/gallery.html">admin gallery</a></p></div>
   </section>
 
   <!-- Product Cards -->
