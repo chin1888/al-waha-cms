@@ -9,42 +9,15 @@
   <link rel="stylesheet" href="../css/admin.css">
   <script src="auth-check.js"></script>
   <style>
-    .gallery-grid-admin {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 12px;
-      padding: 16px 0;
-    }
-    .gallery-card {
-      position: relative;
-      border-radius: 10px;
-      overflow: hidden;
-      background: var(--admin-card);
-      border: 1px solid var(--admin-border);
-      aspect-ratio: 1/1;
-    }
-    .gallery-card img {
-      width: 100%; height: 100%; object-fit: cover;
-    }
-    .gallery-card .del-btn {
-      position: absolute; top: 6px; right: 6px;
-      width: 28px; height: 28px; border-radius: 50%;
-      background: rgba(239,68,68,0.9); color: #fff; border: none;
-      font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
-      opacity: 0; transition: opacity 0.2s;
-    }
+    .gallery-grid-admin { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; padding: 16px 0; }
+    .gallery-card { position: relative; border-radius: 10px; overflow: hidden; background: var(--admin-card); border: 1px solid var(--admin-border); aspect-ratio: 1/1; }
+    .gallery-card img { width: 100%; height: 100%; object-fit: cover; }
+    .gallery-card .del-btn { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 50%; background: rgba(239,68,68,0.9); color: #fff; border: none; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
     .gallery-card:hover .del-btn { opacity: 1; }
-    .upload-area {
-      border: 2px dashed var(--admin-border);
-      border-radius: 10px;
-      padding: 24px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      margin-bottom: 16px;
-    }
+    .upload-area { border: 2px dashed var(--admin-border); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s; margin-bottom: 16px; }
     .upload-area:hover { border-color: var(--admin-accent); }
     .upload-area p { color: var(--admin-text-secondary); margin: 0; font-size: 0.85rem; }
+    .upload-area.dragover { border-color: var(--admin-accent); background: rgba(124,58,237,0.05); }
   </style>
 </head>
 <body>
@@ -53,30 +26,29 @@
 
     <main class="main-content">
       <header class="topbar">
-        <div class="topbar-left">
-          <h1>Product Gallery</h1>
-        </div>
+        <div class="topbar-left"><h1>Product Gallery</h1></div>
         <div class="topbar-right">
           <a href="../products.html" class="admin-btn admin-btn-sm" target="_blank">View Page ↗</a>
         </div>
       </header>
 
       <div class="content-area">
-        <div class="table-card" style="padding:20px;margin-bottom:16px;">
-          <div class="table-header" style="padding:0 0 12px 0;border-bottom:1px solid var(--admin-border);">
-            <div class="filter-pills" id="galleryFilter">
-              <button class="filter-pill active" data-cat="all">All</button>
-              <button class="filter-pill" data-cat="100K">100K</button>
-              <button class="filter-pill" data-cat="200K">200K</button>
-              <button class="filter-pill" data-cat="250K">250K</button>
-            </div>
+        <div class="table-card" style="padding:20px;">
+          <!-- Category tabs -->
+          <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;" id="galleryFilter">
+            <button class="filter-pill active" data-cat="all">All</button>
+            <button class="filter-pill" data-cat="100K">100K</button>
+            <button class="filter-pill" data-cat="200K">200K</button>
+            <button class="filter-pill" data-cat="250K">250K</button>
           </div>
 
-          <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-            <p>📷 Click or drag images to upload for <strong id="uploadCatLabel">All</strong></p>
+          <!-- Upload area -->
+          <div class="upload-area" id="uploadArea">
+            <p>📷 Click to upload images for <strong id="uploadCatLabel">All</strong></p>
           </div>
           <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
 
+          <!-- Image grid -->
           <div class="gallery-grid-admin" id="galleryGrid">
             <p style="color:var(--admin-text-secondary);grid-column:1/-1;text-align:center;">Loading...</p>
           </div>
@@ -89,65 +61,95 @@
   <script src="../js/components.js"></script>
   <script src="../js/admin.js"></script>
   <script>
-    var currentCat = 'all';
     var API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
       ? 'http://localhost:3001/api' : '/api';
+    var currentCat = 'all';
 
-    renderSidebar('gallery');
+    // Wait for everything to be ready
+    function initPage() {
+      try { renderSidebar('gallery'); } catch(e) { console.warn('Sidebar failed:', e.message); }
 
-    // Category filter
-    document.getElementById('galleryFilter').addEventListener('click', function(e) {
-      if (e.target.classList.contains('filter-pill')) {
+      // Upload click
+      document.getElementById('uploadArea').addEventListener('click', function() {
+        document.getElementById('fileInput').click();
+      });
+
+      // Drag & drop
+      var ua = document.getElementById('uploadArea');
+      ua.addEventListener('dragover', function(e) { e.preventDefault(); ua.classList.add('dragover'); });
+      ua.addEventListener('dragleave', function() { ua.classList.remove('dragover'); });
+      ua.addEventListener('drop', function(e) { e.preventDefault(); ua.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+
+      // File input
+      document.getElementById('fileInput').addEventListener('change', function(e) {
+        handleFiles(e.target.files);
+        e.target.value = '';
+      });
+
+      // Category tabs
+      document.getElementById('galleryFilter').addEventListener('click', function(e) {
+        var btn = e.target.closest('.filter-pill');
+        if (!btn) return;
         document.querySelectorAll('#galleryFilter .filter-pill').forEach(function(b) { b.classList.remove('active'); });
-        e.target.classList.add('active');
-        currentCat = e.target.dataset.cat;
+        btn.classList.add('active');
+        currentCat = btn.dataset.cat;
         document.getElementById('uploadCatLabel').textContent = currentCat === 'all' ? 'All' : currentCat;
         loadImages();
-      }
-    });
+      });
 
-    // File upload
-    document.getElementById('fileInput').addEventListener('change', async function(e) {
-      var files = e.target.files;
+      loadImages();
+    }
+
+    async function handleFiles(files) {
       if (!files.length) return;
-      showAdminToast('Uploading ' + files.length + ' image(s)...');
+      var label = currentCat === 'all' ? 'All' : currentCat;
+      try { showAdminToast('Uploading ' + files.length + ' image(s)...'); } catch(e) {}
+
       var ok = 0;
       for (var i = 0; i < files.length; i++) {
-        var url = await CMS.uploadFile(files[i]);
-        if (url) {
+        try {
+          var url = await CMS.uploadFile(files[i]);
+          if (!url) { console.warn('Upload failed for', files[i].name); continue; }
           var cat = currentCat === 'all' ? '100K' : currentCat;
-          await fetch(API + '/product-gallery', {
+          var res = await fetch(API + '/product-gallery', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ image: url, category: cat })
           });
-          ok++;
-        }
+          if (res.ok) ok++;
+          else console.warn('Save to gallery failed:', res.status);
+        } catch(err) { console.warn('Upload error:', err.message); }
       }
-      showAdminToast(ok + '/' + files.length + ' images uploaded');
-      e.target.value = '';
+      try { showAdminToast(ok + '/' + files.length + ' images uploaded'); } catch(e) {}
       loadImages();
-    });
+    }
 
     async function loadImages() {
+      var grid = document.getElementById('galleryGrid');
+      grid.innerHTML = '<p style="color:var(--admin-text-secondary);grid-column:1/-1;text-align:center;">Loading...</p>';
+
       var url = API + '/product-gallery';
       if (currentCat !== 'all') url += '?category=' + currentCat;
-      var res = await fetch(url);
-      var images = await res.json();
+      try {
+        var res = await fetch(url);
+        if (!res.ok) throw new Error('API ' + res.status);
+        var images = await res.json();
 
-      var grid = document.getElementById('galleryGrid');
-      if (images.length === 0) {
-        grid.innerHTML = '<p style="color:var(--admin-text-secondary);grid-column:1/-1;text-align:center;padding:32px;">No images yet — upload some!</p>';
-        return;
+        if (!images.length) {
+          grid.innerHTML = '<p style="color:var(--admin-text-secondary);grid-column:1/-1;text-align:center;padding:32px;">No images yet — upload some!</p>';
+          return;
+        }
+
+        grid.innerHTML = images.map(function(img) {
+          return '<div class="gallery-card">' +
+            '<img src="' + img.image + '" alt="" loading="lazy">' +
+            '<button class="del-btn" onclick="deleteImage(' + img.id + ')" title="Delete">&times;</button>' +
+            '<div style="position:absolute;bottom:4px;left:6px;font-size:0.65rem;color:#fff;text-shadow:0 0 4px #000;">' + img.category + '</div>' +
+            '</div>';
+        }).join('');
+      } catch(e) {
+        grid.innerHTML = '<p style="color:var(--admin-danger);grid-column:1/-1;text-align:center;">Error loading images</p>';
       }
-
-      grid.innerHTML = images.map(function(img) {
-        return '<div class="gallery-card">' +
-          '<img src="' + img.image + '" alt="" loading="lazy">' +
-          '<button class="del-btn" onclick="deleteImage(' + img.id + ')" title="Delete">×</button>' +
-          '<div style="position:absolute;bottom:4px;left:6px;font-size:0.65rem;color:#fff;text-shadow:0 0 4px #000;">' + img.category + '</div>' +
-          '</div>';
-      }).join('');
     }
 
     window.deleteImage = async function(id) {
@@ -156,12 +158,11 @@
       loadImages();
     };
 
-    loadImages();
-
     window._onLangChange = function(lang) {
-      renderSidebar('gallery');
-      I18N.applyToDOM();
+      try { renderSidebar('gallery'); I18N.applyToDOM(); } catch(e) {}
     };
+
+    initPage();
   </script>
 </body>
 </html>
