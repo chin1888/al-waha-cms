@@ -28,6 +28,7 @@
         <div class="cms-page-selector" id="pageSelector">
           <button class="cms-page-tab" data-page="home" data-i18n="content_page_home">🏠 首页</button>
           <button class="cms-page-tab" data-page="carousel" data-i18n="carousel_page">🎠 轮播图</button>
+          <button class="cms-page-tab" data-page="gallery">🖼️ Product Gallery</button>
           <button class="cms-page-tab" data-page="products" data-i18n="content_page_products">🏷️ 产品页面</button>
           <button class="cms-page-tab" data-page="about" data-i18n="content_page_about">📖 关于我们</button>
           <button class="cms-page-tab" data-page="news" data-i18n="content_page_news">📰 新闻页面</button>
@@ -148,6 +149,11 @@
         html += '</div></div>';
         container.innerHTML = html;
         renderCarouselEditor();
+        return;
+      }
+
+      if (page === 'gallery') {
+        renderGalleryManager();
         return;
       }
 
@@ -383,6 +389,100 @@
     // Expose to global for onclick handlers
     window.addCollagePhoto = addCollagePhoto;
     window.deleteCollagePhoto = deleteCollagePhoto;
+
+    // ===== Product Gallery Manager =====
+    var galleryCat = 'all';
+
+    function renderGalleryManager() {
+      var container = document.getElementById('contentGroups');
+      container.innerHTML =
+        '<style>.gal-grid-admin{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;padding:12px 0}.gal-card{position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1/1;background:var(--admin-card);border:1px solid var(--admin-border)}.gal-card img{width:100%;height:100%;object-fit:cover}.gal-card .gal-actions{position:absolute;top:6px;right:6px;display:flex;gap:4px;opacity:0;transition:opacity .2s}.gal-card:hover .gal-actions{opacity:1}.gal-card .gal-btn{width:26px;height:26px;border-radius:50%;border:none;color:#fff;font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center}.gal-btn.del{background:rgba(239,68,68,.9)}.gal-btn.edit{background:rgba(59,130,246,.9)}.gal-up{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}.gal-up input[type=file]{display:none}.gal-up .btn-up{padding:8px 16px;background:var(--admin-accent);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.8rem}.gal-cat-select{padding:6px 10px;background:var(--admin-bg);border:1px solid var(--admin-border);border-radius:6px;color:var(--admin-text);font-size:.8rem}</style>' +
+        '<div class="cms-group"><div class="cms-group-header"><h3>Product Gallery</h3></div><div class="cms-group-body">' +
+        '<div class="filter-pills" id="galFilter" style="margin-bottom:12px;">' +
+          '<button class="filter-pill active" data-cat="all">All</button>' +
+          '<button class="filter-pill" data-cat="100K">100K</button>' +
+          '<button class="filter-pill" data-cat="200K">200K</button>' +
+          '<button class="filter-pill" data-cat="250K">250K</button>' +
+        '</div>' +
+        '<div class="gal-up"><button class="btn-up" onclick="document.getElementById(\'galFileInput\').click()">📷 Upload Images</button>' +
+        '<select class="gal-cat-select" id="galUploadCat"><option value="100K">100K</option><option value="200K">200K</option><option value="250K">250K</option></select>' +
+        '<input type="file" id="galFileInput" accept="image/*" multiple></div>' +
+        '<div class="gal-grid-admin" id="galAdminGrid">Loading...</div>' +
+        '</div></div>';
+
+      // Bind filter
+      document.getElementById('galFilter').addEventListener('click', function(e) {
+        var btn = e.target.closest('.filter-pill');
+        if (!btn) return;
+        document.querySelectorAll('#galFilter .filter-pill').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        galleryCat = btn.dataset.cat;
+        loadGalleryImages();
+      });
+
+      // Bind upload
+      document.getElementById('galFileInput').addEventListener('change', async function(e) {
+        var files = e.target.files;
+        if (!files.length) return;
+        var cat = document.getElementById('galUploadCat').value;
+        showAdminToast('Uploading ' + files.length + ' image(s)...');
+        var ok = 0;
+        for (var i = 0; i < files.length; i++) {
+          var url = await CMS.uploadFile(files[i]);
+          if (!url) continue;
+          var r = await fetch('/api/product-gallery', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: url, category: cat })
+          });
+          if (r.ok) ok++;
+        }
+        showAdminToast(ok + '/' + files.length + ' uploaded');
+        e.target.value = '';
+        loadGalleryImages();
+      });
+
+      loadGalleryImages();
+    }
+
+    async function loadGalleryImages() {
+      var url = '/api/product-gallery';
+      if (galleryCat !== 'all') url += '?category=' + galleryCat;
+      var res = await fetch(url);
+      var images = await res.json();
+      var grid = document.getElementById('galAdminGrid');
+      if (!images.length) {
+        grid.innerHTML = '<p style="color:var(--admin-text-secondary);grid-column:1/-1;text-align:center;padding:32px;">No images</p>';
+        return;
+      }
+      grid.innerHTML = images.map(function(img) {
+        return '<div class="gal-card"><img src="' + img.image + '" loading="lazy">' +
+          '<div class="gal-actions">' +
+          '<button class="gal-btn edit" onclick="editGalleryImage(' + img.id + ',\'' + img.category + '\')" title="Change category">⚙</button>' +
+          '<button class="gal-btn del" onclick="deleteGalleryImage(' + img.id + ')" title="Delete">×</button>' +
+          '</div>' +
+          '<div style="position:absolute;bottom:4px;left:6px;font-size:.65rem;color:#fff;text-shadow:0 0 3px #000;">' + img.category + '</div>' +
+          '</div>';
+      }).join('');
+    }
+
+    window.editGalleryImage = async function(id, currentCat) {
+      var newCat = prompt('Change category (100K/200K/250K):', currentCat);
+      if (!newCat || !['100K','200K','250K'].includes(newCat)) return;
+      var r = await fetch('/api/product-gallery/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: newCat })
+      });
+      if (r.ok) loadGalleryImages();
+      else alert('Update failed');
+    };
+
+    window.deleteGalleryImage = async function(id) {
+      if (!confirm('Delete this image?')) return;
+      await fetch('/api/product-gallery/' + id, { method: 'DELETE' });
+      loadGalleryImages();
+    };
   </script>
 </body>
 </html>

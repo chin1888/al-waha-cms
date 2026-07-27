@@ -509,6 +509,14 @@ app.delete('/api/product-gallery/:id', authRequired, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.put('/api/product-gallery/:id', authRequired, async (req, res) => {
+  try {
+    const { category } = req.body;
+    await pool.execute('UPDATE product_gallery SET category = ? WHERE id = ?', [category, req.params.id]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // =============================================
 // MEDIA API
 // =============================================
