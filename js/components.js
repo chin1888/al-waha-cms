@@ -240,7 +240,7 @@
             gridHTML += '<span class="nav-mega-card-name">' + p.name + '</span>';
             gridHTML += '</a>';
           });
-          gridHTML += '<a href="products.html" class="nav-mega-col-all">View All &rarr;</a>';
+          gridHTML += '<a href="products.html?cat=' + cat + '" class="nav-mega-col-all">View All &rarr;</a>';
           gridHTML += '</div>';
         });
         grid.innerHTML = gridHTML;

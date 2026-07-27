@@ -96,7 +96,7 @@
       CMS.applyToPage();
       if (window._initMegaMenu) window._initMegaMenu();
 
-      var currentFilter = 'all';
+      var currentFilter = window._initCat || 'all';
       var searchQuery = '';
       var products = await CMS.getAllProducts();
 
@@ -222,11 +222,23 @@
 
   <!-- Gallery JS — fully independent -->
   <script>
+    // Read ?cat= from URL to pre-select category
+    var urlParams = new URLSearchParams(location.search);
+    var urlCat = urlParams.get('cat');
+    if (urlCat) {
+      document.querySelectorAll('#filterTags .filter-tag').forEach(function(b) { b.classList.remove('active'); });
+      var target = document.querySelector('#filterTags .filter-tag[data-filter="' + urlCat + '"]');
+      if (target) target.classList.add('active');
+      window._initCat = urlCat;
+    } else {
+      window._initCat = 'all';
+    }
+
     (function() {
       var url = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
         ? 'http://localhost:3001/api/product-gallery' : '/api/product-gallery';
       var allImages = [];
-      var filter = 'all';
+      var filter = window._initCat || 'all';
 
       fetch(url).then(function(r) { return r.ok ? r.json() : []; }).then(function(imgs) {
         allImages = imgs;
