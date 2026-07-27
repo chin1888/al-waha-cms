@@ -90,106 +90,81 @@
   <div id="footer-container"></div>
 
   <script src="js/content-store.js"></script>
-  <script src="js/data.js"></script>
   <script src="js/components.js"></script>
   <script>
-    var API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-      ? 'http://localhost:3001/api' : '/api';
     var currentFilter = 'all';
     var galleryImages = [];
     var allProducts = [];
-    var lbIdx = 0;
 
-    document.addEventListener('DOMContentLoaded', async function() {
-      await CMS.init();
-      CMS.applyToPage();
-      if (window._initMegaMenu) window._initMegaMenu();
-
-      // Load data
-      try { allProducts = await CMS.getAllProducts(); } catch(e) {}
-      try {
-        var r = await fetch(API + '/product-gallery');
-        if (r.ok) galleryImages = await r.json();
-      } catch(e) {}
-
-      buildFilterTags();
-      renderGallery();
-      renderProducts();
-    });
-
-    function buildFilterTags() {
-      var cats = [];
-      allProducts.forEach(function(p) { if (p.category && cats.indexOf(p.category) === -1) cats.push(p.category); });
-      // Tabs are already hardcoded in HTML, just bind events
-      document.getElementById('filterTags').addEventListener('click', function(e) {
-        var btn = e.target.closest('.filter-tag');
-        if (!btn) return;
-        document.querySelectorAll('#filterTags .filter-tag').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        currentFilter = btn.dataset.filter;
+    // ====== GALLERY ======
+    (function loadGallery() {
+      var url = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+        ? 'http://localhost:3001/api/product-gallery' : '/api/product-gallery';
+      fetch(url).then(function(r) { return r.ok ? r.json() : []; }).then(function(imgs) {
+        galleryImages = imgs;
         renderGallery();
-        renderProducts();
-      });
-    }
+      }).catch(function() { galleryImages = []; renderGallery(); });
+    })();
 
     function renderGallery() {
       var imgs = currentFilter === 'all' ? galleryImages : galleryImages.filter(function(i) { return i.category === currentFilter; });
       var grid = document.getElementById('galleryGrid');
       var empty = document.getElementById('galleryEmpty');
-      if (!imgs.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
-      empty.style.display = 'none';
+      if (!imgs.length) { grid.style.display = 'none'; empty.style.display = 'block'; return; }
+      grid.style.display = 'grid'; empty.style.display = 'none';
       window._galleryImages = imgs;
       grid.innerHTML = imgs.map(function(img, idx) {
         return '<div class="gallery-item" onclick="openLightbox(' + idx + ')"><img src="' + img.image + '" alt="" loading="lazy"></div>';
       }).join('');
     }
 
+    // ====== PRODUCTS ======
+    (function loadProducts() {
+      CMS.init().then(function() { CMS.applyToPage(); }).catch(function(){});
+      CMS.getAllProducts().then(function(prods) {
+        allProducts = prods;
+        renderProducts();
+      }).catch(function() { allProducts = []; renderProducts(); });
+    })();
+
     function renderProducts() {
-      var filtered = allProducts.filter(function(p) {
-        return currentFilter === 'all' || p.category === currentFilter;
-      });
-
-      if (!filtered.length) {
-        document.getElementById('productsContainer').style.display = 'none';
-        document.getElementById('noResults').style.display = 'block';
-        return;
-      }
-      document.getElementById('productsContainer').style.display = 'block';
-      document.getElementById('noResults').style.display = 'none';
-
-      // Group by series
+      var filtered = currentFilter === 'all' ? allProducts : allProducts.filter(function(p) { return p.category === currentFilter; });
+      var container = document.getElementById('productsContainer');
+      var noResults = document.getElementById('noResults');
+      if (!filtered.length) { container.style.display = 'none'; noResults.style.display = 'block'; return; }
+      container.style.display = 'block'; noResults.style.display = 'none';
       var map = {};
-      filtered.forEach(function(p) {
-        var s = p.series || 'Other';
-        if (!map[s]) map[s] = [];
-        map[s].push(p);
-      });
+      filtered.forEach(function(p) { var s = p.series || 'Other'; if (!map[s]) map[s] = []; map[s].push(p); });
       var order = ['Gear','Star','Vista','Rave','Neon','Ace','Nex','Joygo','Switch','Magic'];
-      var names = Object.keys(map).sort(function(a,b) {
-        return (order.indexOf(a)===-1?999:order.indexOf(a)) - (order.indexOf(b)===-1?999:order.indexOf(b));
-      });
-
-      var html = '';
+      var names = Object.keys(map).sort(function(a,b) { return (order.indexOf(a)===-1?999:order.indexOf(a)) - (order.indexOf(b)===-1?999:order.indexOf(b)); });
+      var h = '';
       names.forEach(function(s) {
-        html += '<div class="series-section"><div class="series-header"><h2 class="series-name">' + s + ' Series</h2><span class="series-count">' + map[s].length + ' product(s)</span></div><div class="product-grid">';
-        html += map[s].map(function(p) {
-          return '<div class="product-card reveal" onclick="location.href=\'product-detail.html?id=' + p.id + '\'">' +
-            (p.badge ? '<div class="product-badge">' + p.badge + '</div>' : '') +
-            '<div class="product-image">' +
-              (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/) || p.image.match(/^\//))
-                ? '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy">'
-                : '<div class="product-visual" style="background:' + (p.gradient || 'linear-gradient(135deg,#667eea,#764ba2)') + ';">' + (p.image || p.name.charAt(0)) + '</div>') +
-            '</div>' +
-            '<div class="product-info"><div class="product-category">' + p.category + '</div><h3 class="product-name">' + p.name + '</h3>' +
-            '<div class="product-meta"><span class="product-puffs">' + ((p.specs && p.specs.puffs) || p.puffs || '') + '</span><span class="product-link">Learn More →</span></div></div></div>';
+        h += '<div class="series-section"><div class="series-header"><h2 class="series-name">'+s+' Series</h2><span class="series-count">'+map[s].length+' product(s)</span></div><div class="product-grid">';
+        h += map[s].map(function(p) {
+          return '<div class="product-card reveal" onclick="location.href=\'product-detail.html?id='+p.id+'\'">'+
+            (p.badge?'<div class="product-badge">'+p.badge+'</div>':'')+
+            '<div class="product-image">'+(p.image&&(p.image.match(/^https?:\/\//)||p.image.match(/^data:/)||p.image.match(/^\//))?'<img src="'+p.image+'" alt="'+p.name+'" loading="lazy">':'<div class="product-visual" style="background:'+(p.gradient||'linear-gradient(135deg,#667eea,#764ba2)')+';">'+(p.image||p.name.charAt(0))+'</div>')+'</div>'+
+            '<div class="product-info"><div class="product-category">'+p.category+'</div><h3 class="product-name">'+p.name+'</h3><div class="product-meta"><span class="product-puffs">'+((p.specs&&p.specs.puffs)||p.puffs||'')+'</span><span class="product-link">Learn More →</span></div></div></div>';
         }).join('');
-        html += '</div></div>';
+        h += '</div></div>';
       });
-      document.getElementById('productsContainer').innerHTML = html;
+      container.innerHTML = h;
       setTimeout(function() { if (window.initScrollReveal) initScrollReveal(); }, 100);
     }
 
-    // Lightbox
+    // ====== TABS ======
+    document.getElementById('filterTags').addEventListener('click', function(e) {
+      var btn = e.target.closest('.filter-tag');
+      if (!btn) return;
+      document.querySelectorAll('#filterTags .filter-tag').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderGallery();
+      renderProducts();
+    });
+
+    // ====== LIGHTBOX ======
+    var lbIdx = 0;
     window.openLightbox = function(idx) {
       if (!window._galleryImages || !window._galleryImages.length) return;
       lbIdx = idx;
