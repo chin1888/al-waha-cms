@@ -34,21 +34,41 @@ app.use('/uploads', express.static(UPLOAD_DIR));
 
 // ---- Page Visit Tracker ----
 async function ensureVisitsTable() {
-  try { await pool.query('SELECT 1 FROM page_visits LIMIT 0'); }
+  try {
+    await pool.query('SELECT 1 FROM page_visits LIMIT 0');
+    // Ensure geo columns exist (add if missing for upgrades)
+    try { await pool.query('SELECT country FROM page_visits LIMIT 0'); }
+    catch { await pool.query('ALTER TABLE page_visits ADD COLUMN country VARCHAR(100) DEFAULT \'\', ADD COLUMN city VARCHAR(100) DEFAULT \'\''); }
+  }
   catch {
     await pool.query(`CREATE TABLE page_visits (
       id INT AUTO_INCREMENT PRIMARY KEY,
       page VARCHAR(100) NOT NULL,
       ip VARCHAR(45) NOT NULL,
+      country VARCHAR(100) DEFAULT '',
+      city VARCHAR(100) DEFAULT '',
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       INDEX idx_date (created_at),
-      INDEX idx_page (page)
+      INDEX idx_page (page),
+      INDEX idx_country (country)
     ) ENGINE=InnoDB`);
     console.log('page_visits table auto-created');
   }
 }
 
 const SKIP_PATHS = /^\/(api|uploads|admin|css|js|images|assets|favicon|\.)/;
+
+// Simple IP geo lookup (free, no key required, 45 req/min)
+const geoCache = {};
+async function geoLookup(ip) {
+  if (geoCache[ip]) return geoCache[ip];
+  try {
+    const resp = await fetch('http://ip-api.com/json/' + encodeURIComponent(ip) + '?fields=country,city&lang=en');
+    const data = await resp.json();
+    geoCache[ip] = { country: data.country || '', city: data.city || '' };
+    return geoCache[ip];
+  } catch { return { country: '', city: '' }; }
+}
 
 app.use(async (req, res, next) => {
   // Only count frontend page visits
@@ -57,7 +77,9 @@ app.use(async (req, res, next) => {
       await ensureVisitsTable();
       const page = req.path === '/' ? '/' : req.path.split('?')[0];
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
-      pool.execute('INSERT INTO page_visits (page, ip) VALUES (?, ?)', [page, ip]).catch(() => {});
+      const geo = await geoLookup(ip);
+      pool.execute('INSERT INTO page_visits (page, ip, country, city) VALUES (?, ?, ?, ?)',
+        [page, ip, geo.country, geo.city]).catch(() => {});
     } catch {}
   }
   next();
@@ -682,6 +704,20 @@ app.get('/api/stats/visits', async (req, res) => {
       [days]
     );
     res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// Geo stats: country + city breakdown
+app.get('/api/stats/geo', async (req, res) => {
+  try {
+    await ensureVisitsTable();
+    const [countries] = await pool.query(
+      'SELECT country, COUNT(*) as count FROM page_visits WHERE country != \'\' GROUP BY country ORDER BY count DESC'
+    );
+    const [cities] = await pool.query(
+      'SELECT country, city, COUNT(*) as count FROM page_visits WHERE city != \'\' GROUP BY country, city ORDER BY count DESC LIMIT 20'
+    );
+    res.json({ countries, cities });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

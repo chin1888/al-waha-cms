@@ -31,6 +31,7 @@
       <div class="content-area">
         <div class="stat-grid" id="statGrid"></div>
         <div class="stat-grid" id="visitStatCards" style="margin-bottom:16px;"></div>
+        <div id="geoStats"></div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
           <div class="chart-card">
@@ -92,6 +93,29 @@
           visitCard.innerHTML =
             '<div class="stat-card"><div class="stat-header"><div class="stat-icon" style="background:rgba(249,115,22,0.15);">👀</div></div><div class="stat-value">' + (stats.todayVisits || 0) + '</div><div class="stat-label">今日访问</div></div>' +
             '<div class="stat-card"><div class="stat-header"><div class="stat-icon" style="background:rgba(99,102,241,0.15);">📊</div></div><div class="stat-value">' + (stats.totalVisits || 0) + '</div><div class="stat-label">总访问量</div></div>';
+        }
+      }).catch(function(){});
+
+      // Fetch geo stats
+      fetch('/api/stats/geo').then(function(r){ return r.json(); }).then(function(geo){
+        var geoEl = document.getElementById('geoStats');
+        if (geoEl && geo.countries && geo.countries.length) {
+          var html = '<div class="chart-card" style="margin-bottom:16px;"><div class="chart-header"><h3>🌍 访问来源分布</h3></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">';
+          // Countries
+          html += '<div><div style="font-weight:600;margin-bottom:8px;font-size:0.85rem;color:var(--admin-text-secondary);">国家/地区</div>';
+          geo.countries.forEach(function(c){
+            var pct = geo.cities.length ? Math.round(c.count / geo.cities.reduce(function(s,x){return s+x.count;},0) * 100) : 100;
+            html += '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.82rem;"><span>' + c.country + '</span><span style="color:var(--admin-accent);">' + c.count + ' <span style="font-size:0.7rem;color:var(--admin-text-tertiary);">' + pct + '%</span></span></div>';
+          });
+          html += '</div>';
+          // Cities (top 10)
+          html += '<div><div style="font-weight:600;margin-bottom:8px;font-size:0.85rem;color:var(--admin-text-secondary);">城市 (Top 10)</div>';
+          geo.cities.slice(0,10).forEach(function(c){
+            var pct = geo.cities.length ? Math.round(c.count / geo.cities.reduce(function(s,x){return s+x.count;},0) * 100) : 100;
+            html += '<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.82rem;"><span>' + c.city + ' <span style="font-size:0.7rem;color:var(--admin-text-tertiary);">' + c.country + '</span></span><span style="color:var(--admin-accent);">' + c.count + ' <span style="font-size:0.7rem;color:var(--admin-text-tertiary);">' + pct + '%</span></span></div>';
+          });
+          html += '</div></div></div>';
+          geoEl.innerHTML = html;
         }
       }).catch(function(){});
 

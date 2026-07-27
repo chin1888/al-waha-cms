@@ -166,9 +166,12 @@ CREATE TABLE IF NOT EXISTS page_visits (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   page        VARCHAR(100) NOT NULL,
   ip          VARCHAR(45) NOT NULL,
+  country     VARCHAR(100) DEFAULT '',
+  city        VARCHAR(100) DEFAULT '',
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_date (created_at),
-  INDEX idx_page (page)
+  INDEX idx_page (page),
+  INDEX idx_country (country)
 ) ENGINE=InnoDB;
 
 -- ===== Collage Photos =====
