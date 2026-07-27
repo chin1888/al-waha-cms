@@ -479,6 +479,7 @@ app.put('/api/collage-photos/reorder', authRequired, async (req, res) => {
 // =============================================
 app.get('/api/product-gallery', async (req, res) => {
   try {
+    await ensureProductGalleryTable();
     const category = req.query.category;
     let sql = 'SELECT * FROM product_gallery';
     const params = [];
@@ -491,6 +492,7 @@ app.get('/api/product-gallery', async (req, res) => {
 
 app.post('/api/product-gallery', authRequired, async (req, res) => {
   try {
+    await ensureProductGalleryTable();
     const { image, category, sort_order } = req.body;
     const [result] = await pool.execute(
       'INSERT INTO product_gallery (image, category, sort_order) VALUES (?, ?, ?)',
@@ -689,6 +691,21 @@ app.get('/api/health', async (req, res) => {
     res.status(500).json({ status: 'error', db: e.message });
   }
 });
+
+// ===== Helper: ensure product_gallery table =====
+async function ensureProductGalleryTable() {
+  try { await pool.query('SELECT 1 FROM product_gallery LIMIT 0'); }
+  catch {
+    await pool.query(`CREATE TABLE IF NOT EXISTS product_gallery (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      category VARCHAR(20) NOT NULL,
+      image VARCHAR(500) NOT NULL,
+      sort_order INT DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB`);
+    console.log('product_gallery table auto-created');
+  }
+}
 
 // ===== Helper =====
 function safeJson(val, fallback) {
