@@ -16,11 +16,6 @@
       position: relative; overflow: hidden; background: var(--bg-secondary);
     }
     .gal-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .gal-hero .gal-label {
-      position: absolute; bottom: 24px; left: 24px;
-      color: #fff; font-size: 1.2rem; font-weight: 700;
-      text-shadow: 0 2px 8px rgba(0,0,0,.5);
-    }
     .gal-empty { text-align: center; padding: 80px 16px; color: var(--text-secondary); display: none; }
   </style>
 </head>
@@ -33,7 +28,6 @@
   <section class="gal-section">
     <div class="gal-hero" id="galHero">
       <img id="galImg" src="" alt="" style="display:none;">
-      <div class="gal-label" id="galLabel"></div>
     </div>
     <div class="gal-empty" id="galEmpty"><div style="font-size:3rem;">🖼️</div><p>Upload images in <a href="admin/gallery.html">admin gallery</a></p></div>
   </section>
@@ -249,14 +243,12 @@
       function refresh() {
         var pool = filter === 'all' ? allImages : allImages.filter(function(i) { return i.category === filter; });
         var img = document.getElementById('galImg');
-        var label = document.getElementById('galLabel');
         var empty = document.getElementById('galEmpty');
         if (!pool.length) { img.style.display = 'none'; empty.style.display = 'block'; return; }
         empty.style.display = 'none';
-        var pick = pool[0]; // first image of the category
+        var pick = pool[0];
         img.src = pick.image;
         img.style.display = 'block';
-        label.textContent = pick.category;
       }
     })();
   </script>
