@@ -475,6 +475,39 @@ app.put('/api/collage-photos/reorder', authRequired, async (req, res) => {
 });
 
 // =============================================
+// PRODUCT GALLERY API
+// =============================================
+app.get('/api/product-gallery', async (req, res) => {
+  try {
+    const category = req.query.category;
+    let sql = 'SELECT * FROM product_gallery';
+    const params = [];
+    if (category && category !== 'all') { sql += ' WHERE category = ?'; params.push(category); }
+    sql += ' ORDER BY sort_order, id';
+    const [rows] = await pool.execute(sql, params);
+    res.json(rows);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.post('/api/product-gallery', authRequired, async (req, res) => {
+  try {
+    const { image, category, sort_order } = req.body;
+    const [result] = await pool.execute(
+      'INSERT INTO product_gallery (image, category, sort_order) VALUES (?, ?, ?)',
+      [image, category || 'all', sort_order || 0]
+    );
+    res.json({ ok: true, id: result.insertId });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+app.delete('/api/product-gallery/:id', authRequired, async (req, res) => {
+  try {
+    await pool.execute('DELETE FROM product_gallery WHERE id = ?', [req.params.id]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// =============================================
 // MEDIA API
 // =============================================
 app.get('/api/media', async (req, res) => {

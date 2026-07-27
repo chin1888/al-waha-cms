@@ -152,6 +152,15 @@ CREATE TABLE IF NOT EXISTS users (
   created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ===== Product Gallery (category image grids for products page) =====
+CREATE TABLE IF NOT EXISTS product_gallery (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  category    VARCHAR(20) NOT NULL,
+  image       VARCHAR(500) NOT NULL,
+  sort_order  INT DEFAULT 0,
+  created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
 -- ===== Collage Photos =====
 CREATE TABLE IF NOT EXISTS collage_photos (
   id          INT AUTO_INCREMENT PRIMARY KEY,
