@@ -411,6 +411,14 @@ app.delete('/api/contact/:id', authRequired, async (req, res) => {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Unread message count (for sidebar badge)
+app.get('/api/contact/unread-count', async (req, res) => {
+  try {
+    const [[{count}]] = await pool.query('SELECT COUNT(*) as count FROM contact_submissions WHERE is_read = 0');
+    res.json({ count });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // =============================================
 // CAROUSEL API
 // =============================================

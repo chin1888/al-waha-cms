@@ -77,7 +77,29 @@ function renderSidebar(activePage) {
   }
   // Inject lang switcher into topbar
   setTimeout(injectLangSwitcher, 100);
+  // Poll unread message count for sidebar badge
+  updateContactBadge();
 }
+
+// Update sidebar "用户留言" badge with unread count
+function updateContactBadge() {
+  var contactLink = document.querySelector('.sidebar-nav .nav-item[data-page="contact-msgs"]');
+  if (!contactLink) return;
+  var badge = contactLink.querySelector('.badge');
+  fetch('/api/contact/unread-count').then(function(r){ return r.json(); }).then(function(data){
+    if (data.count > 0) {
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'badge';
+        contactLink.appendChild(badge);
+      }
+      badge.textContent = data.count;
+    } else {
+      if (badge) badge.remove();
+    }
+  }).catch(function(){});
+}
+window.updateContactBadge = updateContactBadge;
 
 // Toast notification
 function showAdminToast(message, type) {

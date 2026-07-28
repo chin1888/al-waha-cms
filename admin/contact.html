@@ -157,6 +157,7 @@
           closeMsgModal();
         }
         loadMessages();
+        if (window.updateContactBadge) window.updateContactBadge();
       }
     }
 
@@ -185,6 +186,7 @@
       if (!m.is_read) {
         await CMS.markContactRead(id);
         await loadMessages();
+        if (window.updateContactBadge) window.updateContactBadge();
       }
     }
 
