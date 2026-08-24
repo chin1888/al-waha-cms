@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>News Detail - AL-WAHA</title>
   <meta name="description" content="AL-WAHA news and media detail page.">
+  <link rel="canonical" href="https://al-wahacms.onrender.com/news-detail.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="AL-WAHA">
+  <meta property="og:title" content="News Detail - AL-WAHA">
+  <meta property="og:description" content="AL-WAHA news and media detail page.">
+  <meta property="og:url" content="https://al-wahacms.onrender.com/news-detail.html">
+  <meta property="og:image" content="https://al-wahacms.onrender.com/images/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="News Detail - AL-WAHA">
+  <meta name="twitter:description" content="AL-WAHA news and media detail page.">
+  <meta name="twitter:image" content="https://al-wahacms.onrender.com/images/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
@@ -372,6 +385,12 @@
         var metaDesc = document.querySelector('meta[name="description"]');
         if (metaDesc) metaDesc.setAttribute('content', article.excerpt);
       }
+      // Update Open Graph tags for social sharing
+      function setOG(p, v){ var m = document.querySelector('meta[property="'+p+'"]'); if(m) m.setAttribute('content', v); }
+      setOG('og:title', article.title + ' - AL-WAHA');
+      if (article.excerpt) setOG('og:description', article.excerpt);
+      if (article.image) setOG('og:image', article.image);
+      setOG('og:url', location.href);
 
       // Banner
       var bannerHTML = article.image

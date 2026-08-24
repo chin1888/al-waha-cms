@@ -10,3 +10,4 @@ vercel-dist/
 mysql/
 *.sql
 *.bat
+.pylibs/
