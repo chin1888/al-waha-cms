@@ -3,24 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AL-WAHA | Make Joy Happen - Premium Vape Brand</title>
-  <meta name="description" content="AL-WAHA is an international vape brand devoted to accelerating the world's transition to a smoking-free place.">
+  <title>AL-WAHA | Premium Aluminum &amp; CNC Hookah, Rechargeable Vape Brand</title>
+  <meta name="description" content="AL-WAHA designs premium Aluminum Hookah, CNC Aluminum Hookah and Rechargeable Hookah devices. Explore our Hookah Shisha collection and advanced vape products.">
   <meta name="keywords" content="Aluminum Hookah, Hookah Shisha, Hookah, CNC Aluminum Hookah, Rechargeable Hookah, AL-WAHA vape">
   <meta name="google-site-verification" content="fXx6Z1ce7kIXXYdVUpxinNVHKqw6SAAW1M1u5Chg_eQ">
   <link rel="canonical" href="https://al-wahacms.onrender.com/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="AL-WAHA">
-  <meta property="og:title" content="AL-WAHA | Make Joy Happen - Premium Vape Brand">
-  <meta property="og:description" content="AL-WAHA is an international vape brand devoted to accelerating the world's transition to a smoking-free place.">
+  <meta property="og:title" content="AL-WAHA | Premium Aluminum &amp; CNC Hookah, Rechargeable Vape Brand">
+  <meta property="og:description" content="AL-WAHA designs premium Aluminum Hookah, CNC Aluminum Hookah and Rechargeable Hookah devices. Explore our Hookah Shisha collection.">
   <meta property="og:url" content="https://al-wahacms.onrender.com/">
   <meta property="og:image" content="https://al-wahacms.onrender.com/images/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="AL-WAHA | Make Joy Happen - Premium Vape Brand">
-  <meta name="twitter:description" content="AL-WAHA is an international vape brand devoted to accelerating the world's transition to a smoking-free place.">
+  <meta name="twitter:title" content="AL-WAHA | Premium Aluminum &amp; CNC Hookah, Rechargeable Vape Brand">
+  <meta name="twitter:description" content="AL-WAHA designs premium Aluminum Hookah, CNC Aluminum Hookah and Rechargeable Hookah devices. Explore our Hookah Shisha collection.">
   <meta name="twitter:image" content="https://al-wahacms.onrender.com/images/og-image.png">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AL-WAHA","url":"https://al-wahacms.onrender.com/","logo":"https://al-wahacms.onrender.com/images/og-image.png","description":"AL-WAHA is an international vape brand devoted to accelerating the world's transition to a smoking-free place."}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"AL-WAHA","url":"https://al-wahacms.onrender.com/","logo":"https://al-wahacms.onrender.com/images/og-image.png","description":"AL-WAHA designs premium Aluminum Hookah, CNC Aluminum Hookah and Rechargeable Hookah devices. Explore our Hookah Shisha collection."}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"AL-WAHA Aluminum Hookah","brand":{"@type":"Brand","name":"AL-WAHA"},"category":"Hookah Shisha","url":"https://al-wahacms.onrender.com/products.html","description":"Premium Aluminum Hookah and CNC Aluminum Hookah devices, including Rechargeable Hookah models engineered for modern Hookah Shisha experiences."}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
@@ -49,6 +50,7 @@
     <div class="container">
       <div class="section-header reveal">
         <h2 class="section-title" data-cms="home._featuredTitle" data-cms-auto-gradient>Recommended Products</h2>
+        <p style="max-width:720px;margin:12px auto 0;color:var(--text-secondary);font-size:1.05rem;line-height:1.6;">Discover AL-WAHA's premium <strong>Aluminum Hookah</strong>, <strong>CNC Aluminum Hookah</strong> and <strong>Rechargeable Hookah</strong> devices — engineered <strong>Hookah Shisha</strong> experiences built for performance and longevity.</p>
       </div>
       <div class="recommended-grid" id="recommendedProducts"></div>
       <div style="text-align: center; margin-top: 40px;">
@@ -160,7 +162,7 @@
         recommended.forEach(function(product) {
           var imgHtml = '';
           if (product.image && (product.image.match(/^https?:\/\//) || product.image.match(/^data:/) || product.image.match(/^\/uploads\//))) {
-            imgHtml = '<img src="' + product.image + '" alt="' + product.name + '" loading="lazy">';
+            imgHtml = '<img src="' + product.image + '" alt="Aluminum Hookah ' + product.name + '" loading="lazy">';
           } else {
             var gradient = product.gradient || 'linear-gradient(135deg, #667eea, #764ba2)';
             imgHtml = '<div class="rec-visual" style="background: ' + gradient + ';">' + (product.image || product.name.charAt(0)) + '</div>';
@@ -392,7 +394,7 @@
         function buildTrackHtml(arr) {
           var html = '';
           arr.forEach(function(url) {
-            html += '<div class="makejoy-marquee-item"><img src="' + url + '" alt="AL-WAHA product" loading="lazy"></div>';
+            html += '<div class="makejoy-marquee-item"><img src="' + url + '" alt="AL-WAHA Aluminum Hookah" loading="lazy"></div>';
           });
           return html;
         }
