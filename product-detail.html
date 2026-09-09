@@ -3,22 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Product Detail - AL-WAHA | Make Joy Happen</title>
-  <meta name="description" content="View detailed specifications, flavors, and features of AL-WAHA products.">
+  <title>AL-WAHA Aluminum Hookah &amp; Rechargeable Vape Products</title>
+  <meta name="description" content="Explore AL-WAHA Aluminum Hookah, CNC Aluminum Hookah and Rechargeable Hookah specifications, flavors and features.">
   <meta name="keywords" content="Aluminum Hookah, Hookah Shisha, Hookah, CNC Aluminum Hookah, Rechargeable Hookah, AL-WAHA vape">
   <link rel="canonical" href="https://al-wahacms.onrender.com/product-detail.html">
   <meta property="og:type" content="product">
   <meta property="og:site_name" content="AL-WAHA">
-  <meta property="og:title" content="Product Detail - AL-WAHA | Make Joy Happen">
-  <meta property="og:description" content="View detailed specifications, flavors, and features of AL-WAHA products.">
+  <meta property="og:title" content="AL-WAHA Aluminum Hookah &amp; Rechargeable Vape Products">
+  <meta property="og:description" content="Explore AL-WAHA Aluminum Hookah, CNC Aluminum Hookah and Rechargeable Hookah specifications, flavors and features.">
   <meta property="og:url" content="https://al-wahacms.onrender.com/product-detail.html">
   <meta property="og:image" content="https://al-wahacms.onrender.com/images/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Product Detail - AL-WAHA | Make Joy Happen">
-  <meta name="twitter:description" content="View detailed specifications, flavors, and features of AL-WAHA products.">
+  <meta name="twitter:title" content="AL-WAHA Aluminum Hookah &amp; Rechargeable Vape Products">
+  <meta name="twitter:description" content="Explore AL-WAHA Aluminum Hookah, CNC Aluminum Hookah and Rechargeable Hookah specifications, flavors and features.">
   <meta name="twitter:image" content="https://al-wahacms.onrender.com/images/og-image.png">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Product","name":"AL-WAHA Aluminum Hookah","brand":{"@type":"Brand","name":"AL-WAHA"},"category":"Hookah Shisha","url":"https://al-wahacms.onrender.com/products.html","description":"AL-WAHA Aluminum Hookah, CNC Aluminum Hookah and Rechargeable Hookah devices with detailed specifications and flavors."}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
@@ -97,10 +98,10 @@
       product.detail_content = product.detail_content || '';
 
       document.getElementById('breadcrumbName').textContent = product.name;
-      document.title = product.name + ' - AL-WAHA | Make Joy Happen';
+      document.title = product.name + ' - AL-WAHA Aluminum Hookah';
       // Update Open Graph tags for social sharing
       function setOG(p, v){ var m = document.querySelector('meta[property="'+p+'"]'); if(m) m.setAttribute('content', v); }
-      setOG('og:title', product.name + ' - AL-WAHA');
+      setOG('og:title', product.name + ' - AL-WAHA Aluminum Hookah');
       if (product.description) setOG('og:description', product.description);
       if (product.image && (product.image.match(/^https?:\/\//) || product.image.match(/^\//))) setOG('og:image', product.image);
       setOG('og:url', location.href);
@@ -112,7 +113,7 @@
       var isImageUrl = product.image && (product.image.match(/^https?:\/\//) || product.image.match(/^data:/) || product.image.match(/^\//));
       var mainImageHtml;
       if (isImageUrl) {
-        mainImageHtml = '<img src="' + product.image + '" alt="' + product.name + '">';
+        mainImageHtml = '<img src="' + product.image + '" alt="Aluminum Hookah ' + product.name + '">';
       } else {
         mainImageHtml = '<div class="product-visual-lg" style="background: ' + (product.gradient || 'linear-gradient(135deg, #667eea, #764ba2)') + ';">' + (product.image || product.name.charAt(0)) + '</div>';
       }
@@ -214,7 +215,7 @@
             var badgeEl = mainImg.querySelector('.product-badge');
             var badgeHTML = badgeEl ? badgeEl.outerHTML : '';
             var bgStyle = product.gradient ? 'background: ' + product.gradient + ';' : '';
-            mainImg.innerHTML = '<img src="' + imgSrc + '" alt="' + product.name + '" style="width:100%; height:100%; object-fit:contain; padding:24px;">' + badgeHTML;
+            mainImg.innerHTML = '<img src="' + imgSrc + '" alt="Aluminum Hookah ' + product.name + '" style="width:100%; height:100%; object-fit:contain; padding:24px;">' + badgeHTML;
             mainImg.setAttribute('style', bgStyle);
           }
         });
@@ -237,7 +238,7 @@
           (p.badge ? '<div class="product-badge">' + p.badge + '</div>' : '') +
           '<div class="product-image">' +
             (p.image && (p.image.match(/^https?:\/\//) || p.image.match(/^data:/) || p.image.match(/^\//))
-              ? '<img src="' + p.image + '" alt="' + p.name + '" loading="lazy">'
+              ? '<img src="' + p.image + '" alt="Aluminum Hookah ' + p.name + '" loading="lazy">'
               : '<div class="product-visual" style="background: ' + (p.gradient || 'linear-gradient(135deg, #667eea, #764ba2)') + ';">' + (p.image || p.name.charAt(0)) + '</div>'
             ) +
           '</div>' +
