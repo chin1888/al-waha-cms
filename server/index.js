@@ -32,6 +32,16 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use('/uploads', express.static(UPLOAD_DIR));
 
+// ---- Canonical redirect: apex alwaha.cn -> www.alwaha.cn (SEO, 301) ----
+app.use((req, res, next) => {
+  const host = (req.headers['x-forwarded-host'] || req.headers.host || '')
+    .split(':')[0].toLowerCase();
+  if (host === 'alwaha.cn') {
+    return res.redirect(301, 'https://www.alwaha.cn' + req.originalUrl);
+  }
+  next();
+});
+
 // ---- Page Visit Tracker ----
 async function ensureVisitsTable() {
   try {
