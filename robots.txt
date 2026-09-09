@@ -5,4 +5,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: https://al-wahacms.onrender.com/sitemap.xml
+Sitemap: https://www.alwaha.cn/sitemap.xml
