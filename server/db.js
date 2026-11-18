@@ -11,11 +11,11 @@ const path = require('path');
 try { process.loadEnvFile(path.join(__dirname, '..', '.env')); } catch {}
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || '127.0.0.1',
-  port: parseInt(process.env.DB_PORT) || 3306,
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'alwaha123',
-  database: process.env.DB_NAME || 'alwaha',
+  host: process.env.DB_HOST || process.env.MYSQLHOST || '127.0.0.1',
+  port: parseInt(process.env.DB_PORT || process.env.MYSQLPORT) || 3306,
+  user: process.env.DB_USER || process.env.MYSQLUSER || 'root',
+  password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || 'alwaha123',
+  database: process.env.DB_NAME || process.env.MYSQLDATABASE || 'alwaha',
   waitForConnections: true,
   connectionLimit: parseInt(process.env.DB_POOL) || 10,
   charset: 'utf8mb4'
