@@ -1,35 +1,24 @@
 /* ================================
    AL-WAHA — MySQL Connection Pool
-   Set AIVEN=true env + MYSQL* vars for cloud MySQL
+   Config via env vars (DB_*), same pattern as gobulkvape project:
+   - Local dev: .env file in project root (git-ignored)
+   - Production (Render): set DB_* env vars in Render dashboard
    ================================ */
 const mysql = require('mysql2/promise');
+const path = require('path');
 
-const useAiven = process.env.AIVEN === 'true';
-const missing = useAiven && !process.env.MYSQLPASSWORD;
+// Load local .env from project root if present (silently skip when absent, e.g. on Render)
+try { process.loadEnvFile(path.join(__dirname, '..', '.env')); } catch {}
 
-const pool = mysql.createPool(
-  useAiven ? {
-    host: process.env.MYSQLHOST || 'mysql-3577acf-al-hawa.h.aivencloud.com',
-    port: parseInt(process.env.MYSQLPORT) || 19170,
-    user: process.env.MYSQLUSER || 'avnadmin',
-    password: process.env.MYSQLPASSWORD || (missing ? '' : ''),
-    database: process.env.MYSQLDATABASE || 'defaultdb',
-    ssl: { rejectUnauthorized: false }
-  } : {
-    host: '127.0.0.1',
-    port: 3306,
-    user: 'root',
-    password: 'alwaha123',
-    database: 'alwaha'
-  }
-);
-
-if (missing) console.error('ERROR: AIVEN=true but MYSQLPASSWORD not set!');
-
-pool.config = { ...pool.config,
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || '127.0.0.1',
+  port: parseInt(process.env.DB_PORT) || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'alwaha123',
+  database: process.env.DB_NAME || 'alwaha',
   waitForConnections: true,
-  connectionLimit: useAiven ? 5 : 10,
+  connectionLimit: parseInt(process.env.DB_POOL) || 10,
   charset: 'utf8mb4'
-};
+});
 
 module.exports = pool;
