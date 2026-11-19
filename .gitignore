@@ -11,3 +11,4 @@ mysql/
 *.sql
 *.bat
 .pylibs/
+_recover/
