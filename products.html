@@ -174,7 +174,7 @@
           '<div class="product-info">' +
             '<div class="product-category">' + product.category + '</div>' +
             '<h3 class="product-name">' + product.name + '</h3>' +
-            '<p class="product-desc">' + product.desc + '</p>' +
+            '<p class="product-desc">' + (product.desc || product.description || '') + '</p>' +
             '<div class="product-meta">' +
               '<span class="product-puffs">' + product.puffs + '</span>' +
               '<span class="product-link">Learn More &rarr;</span>' +
@@ -191,8 +191,8 @@
           var matchFilter = currentFilter === 'all' || p.category === currentFilter;
           var matchSearch = !searchQuery ||
             p.name.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
-            p.desc.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
-            p.series.toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1;
+            (p.desc || p.description || '').toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1 ||
+            (p.series || '').toLowerCase().indexOf(searchQuery.toLowerCase()) !== -1;
           return matchFilter && matchSearch;
         });
 

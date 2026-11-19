@@ -245,7 +245,7 @@
           '<div class="product-info">' +
             '<div class="product-category">' + p.series + '</div>' +
             '<h3 class="product-name">' + p.name + '</h3>' +
-            '<p class="product-desc">' + p.desc + '</p>' +
+            '<p class="product-desc">' + (p.desc || p.description || '') + '</p>' +
             '<div class="product-meta">' +
               '<span class="product-puffs">' + p.puffs + '</span>' +
               '<span class="product-link">Learn More &rarr;</span>' +
